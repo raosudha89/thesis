@@ -37,7 +37,14 @@ Asking questions is fundamental to communication, and machines cannot effectivel
 \section{Introduction}
 
 \subsection{Motivation}
+https://www.skillsyouneed.com/ips/clarification.html
+In communication, clarification involves offering back to the speaker the essential meaning, as understood by the listener, of what they have just said. Thereby checking that the listener's understanding is correct and resolving any areas of confusion or misunderstanding.
 
+Clarification is important in many situations especially when what is being communicated is difficult in some way.
+
+%Read more at: https://www.skillsyouneed.com/ips/clarification.html
+%-- talk about difference between clarification questions and probing questions
+%-- types of clarification questions: open & closed (http://study.com/academy/lesson/clarifying-questions-definition-examples.html)
 
 \section{Related Work}
 
@@ -47,6 +54,8 @@ The problem of question generation has received sparse attention from the natura
 
 Outside reading comprehension questions, \cite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \cite{liu2010automatic} use template question generation to help authors write better related work sections. \cite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
 \cite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \cite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
+
+- Question generation shared task: http://www.aclweb.org/anthology/W11-2853
 
 \subsection{Neural networks in NLP}
 
@@ -558,14 +567,121 @@ The first is in evaluation: given that this task is so difficult for humans, but
 This is exactly the same question faced in much research in dialog and generation more broadly \cite{paek2001empirical,lowe2015ubuntu,liu2016not,kannan2017adversarial}.
 Second, to make question generation more general, systems need to be able to generalize, for instance by constructing templates of the from ``What version of \_\_\_ are you running?'' into which the system would need to fill a variable. Finally, asking question is a natural component of dialog, and building a collaborative dialog system that can naturally converse with a user is a broad long term goal.
 
-
 \section{Proposed Work}
+
+\subsection{Generating question templates}
+
+In our preliminary work, we focused on building a model that can learn to select a question to ask from a candidate set of prior questions. To make the system more general, it needs to be able to generalize to new context well. Therefore, in this work, we propose to generate templates for questions. For e.g. consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We identify four components to this template form of question generation:
+\begin{enumerate}
+\item Identifying near similar questions from a huge collection of questions
+\item Identifying topic specific words in the questions and removing them to generate templates
+\item Given a post, selecting the right question template from a candidate set of question templates
+\item Filling in the blanks in the template using relevant context from the given post.
+\end{enumerate}
+
+\subsubsection{Background}
+ Template generation is well studied in question answering (Ravichandran \& Hovy, 2002) and information extraction (Riloff, 1996), but not for question generation.
+
+\subsubsection{Identifying similar questions}
+
+We propose two strategies for identifying similar questions:
+
+\textbf{Using clustering algorithm}: Given a set of clarification questions, we first use clustering algorithm (explore all available clustering algorithms) and cluster questions - Look at the cluster outputs. If they don't look useful, then use the next strategy - Can we remove topic specific words from questions to make them general? And then use clustering algorithm.
+
+\textbf{Using Lucene}: Given a question, we use Lucene to identify top N questions similar to the given question. Do this for each question and then create question clusters from this information.
+
+\subsubsection{Extracting templates}
+
+Given a set of questions that are near similar, the next step is to extract a generic template which can be expanded to (almost) each of the variants in the set. We use the parts-of-speech information of the words in the question to identify proper nouns (and others) that indicate specific topics. Given these markings, we remove them from the questions to generate a template. Further, we classify questions into probable question types using an idea similar to \cite{}.
+
+%- We can use POS tags to identify proper nouns (and others) which indicate specific words
+%- Extracting patterns from text: https://www.cs.utah.edu/~riloff/pdfs/aaai96.pdf
+%- Clustering questions: http://nlp.stanford.edu/courses/cs224n/2007/fp/paranjpe.pdf -- use POS tags to extract topic of a question (neat idea) --- classify questions in question types
+%- Generating question templates using (query -> QA website question) pairs - http://www.aclweb.org/anthology/I11-1104 (poorly written :/) - related work is very exhaustive!
+
+\subsubsection{Selecting question templates at test time}
+
+Given a post, the next step then is to generate a set of candidate question templates and then to select the most relevant question template from the set of candidates. We use our previous model for this step.
+
+\subsubsection{Filling in the blanks in the templates}
+
+- How do we do this? Talk to Hal
+
+\subsection{Conversation continuing questions}
+
+\subsection{Generating questions using neural network generative model}
+
+\subsection{Using external knowledge to find missing information}
+% Grammarly internship project could be in this direction -- information autocomplete/ information augmentation
+
+\subsection{Information augmentation}
+
+\begin{enumerate}
+\item We define information augmentation as enhancing a given text with additional useful information. 
+\item The goal is the following: given a fragment of text (paragraph or document), identify what information is structurally missing from the text. 
+\item Rhetorical Structure theory (RST) gives us the structure of a paragraph in term of identify the nucleus ( main argument) and the satellites (supporting arguments) and also defines relations between them. -- Intro to RST: http://www.sfu.ca/rst/01intro/intro.html
+\item We define our concrete task as follows: Given a paragraph, say we remove a sentence from the paragraph. The task is given a paragraph (with one of its sentences removed), its RST and given a set of candidate sentences (one of which is the true sentence), identify which sentence when added to the paragraph would add the missing information.
+\item We approach this problem as follows: We take inspiration from Recursive Neural Networks which makes use of the dependency parse tree along with the words of the sentence to model a neural network for downstream tasks like sentiment analysis
+\item Likewise, we propose to use the RST along with the sentences to model a neural network for a discriminative task of identifying the right sentence from the set of candidate sentences
+\end{enumerate}
+
+\subsubsection{Rhetorical structure theory}
+
+- Applications of RST: https://www.sfu.ca/~mtaboada/docs/Taboada_Mann_RST_Part2.pdf
+
+\iffalse
+- question templates
+- make use of external knowledge to understand what is missing
+- generating questions using neural network generative model (encoder-decoder)
 
 \subsection{Generating question templates}
 
 The initial model we will build will focus on selecting an exact question to ask from a candidate set of prior questions. To make the system more general, it needs to be able to generalize. We will generate templates like "What version of \_\_\_ are you running?", which is more general than the thousands of specific variants in our data. The second step of our research will focus on clustering questions and automatically extracting templates, and then learn how to fill in the blanks based on words in the original post. Template generation is well studied in question answering (Ravichandran \& Hovy, 2002) and information extraction (Riloff, 1996), but not for question generation.
 
+-- http://www.ijcsi.org/papers/IJCSI-11-6-1-45-53.pdf
+-- for generating templates, we should definitely look at sentence structure (POS and dependencies) to understand what specific word that should be removed to make the template generic
+
+Related work
+- Generating answer templates: http://www.aclweb.org/anthology/P02-1006
+- Extracting patterns from text: https://www.cs.utah.edu/~riloff/pdfs/aaai96.pdf
+- Question generation pipeline: https://www.aclweb.org/anthology/W/W13/W13-2114.pdf
+- Generating question templates using (query -> QA website question) pairs - http://www.aclweb.org/anthology/I11-1104 (poorly written :/) - related work is very exhaustive!
+- Clustering questions: http://nlp.stanford.edu/courses/cs224n/2007/fp/paranjpe.pdf -- use POS tags to extract topic of a question (neat idea) --- classify questions in question types --- 
+- Recent paper on clarification questions in dialogues: Given a sentence that has a certain specific word missing, generate a question that would ask for that missing information. http://www.cs.columbia.edu/speech/PaperFiles/2014/AISB2014_StoyanchevLiuHirschberg_final.pdf
+
+Papers using SE - https://meta.stackexchange.com/questions/134495/academic-papers-using-stack-exchange-data
+
+Idea
+- cluster questions
+- find a way to generalize one question (i.e. find a representative question) out of one cluster
+- remove the specific words to form the representative question
+- Can we use some form of importance weighting to understand what part of the input post (which is very long sometimes) is important? -- check sub-sampling in http://www.ccs.neu.edu/home/luwang/papers/NAACL2016.pdf
+
+
+New Ideas
+- How about actually deploying our bot-clarification-question-asker on stackexchange? - cool CHI paper: http://bvasiles.github.io/papers/chi16bot.pdf -- you can totally cite this paper since this paper talks about how a bot can really help users on Q&A forums!!
+- we should make use of metadata information (upvotes, user rating, etc)
+- Can we make use of external knowledge sources? (wikipedia, some manual, database) that can tell us that something is missing?
+- Generate questions using neural network models (suggestion from Chris Manning)
+
+-- Ideas from before
+How good is the cluster test
+Should we think about generative model? Otherwise it is hard to see how a comment can be applicable to other new posts -- unless it is very very general (e.g. what did your advisor say) 
+How about a seq-to-seq model i.e. post-to-comment model
+Generate questions after extracting knowledge about the subject from some external source? E.g. In debates data, for questions posted by audience, maybe we can learn about the topic from wikipedia and then generate question?
+
+
 \subsection{Conversation continuing questions}
+
+\subsection{Automated Librarian}
+
+\subsection{Grammarly internship project}
+
+\subsection{Clarification question for query enhancement}
+
+\subsection{Debates dataset QA}
+
+\fi
 
 \subsection{Timeline}
 
