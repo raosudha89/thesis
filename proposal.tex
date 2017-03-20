@@ -607,17 +607,28 @@ Given a post, the next step then is to generate a set of candidate question temp
 
 - How do we do this? Talk to Hal
 
-\subsection{Conversation continuing questions}
-
 \subsection{Generating questions using neural network generative model}
 
 \begin{enumerate}
-\item Sequence2sequence models have been used for language generation tasks like machine translation, question answering, dialogue generation
-\item Can we 
+\item Person based dialog modeling: https://arxiv.org/pdf/1603.06155.pdf
+\item Sequence to sequence model: https://papers.nips.cc/paper/5346-sequence-to-sequence-learning-with-neural-networks.pdf
+\item Neural network generative question answering model: https://arxiv.org/pdf/1512.01337.pdf  -- their answer model inquires a knowledge base to retrieve the answer. The answer language model decides, at each time step, whether to generate a common vocabulary word or a knowledge base answer word
+\item Idea: Seq2Seq model for generating a clarification question given context of the post
+\item Blog on dialog progress: http://www.wildml.com/2016/04/deep-learning-for-chatbots-part-1-introduction/  
 \end{enumerate}
 
-\subsection{Using external knowledge to find missing information}
-% Grammarly internship project could be in this direction -- information autocomplete/ information augmentation
+\subsection{Clarification question for multi-turn dialogues}
+
+\begin{enumerate}
+\item Clarification questions for spoken dialogue systems  -- the focus here is more on generating naturally occuring clarification questions i.e. questions that are more context specific as opposed to saying ‘please repeat’ like generic question %http://www.cs.columbia.edu/speech/PaperFiles/2014/AISB2014_StoyanchevLiuHirschberg_final.pdf
+\item Clarifying the specific entity in the text (more like word sense disambiguation): % https://pdfs.semanticscholar.org/eb75/46bdc723bc07c24c66a05b34ab264b4c7a0c.pdf
+ -- they use 3 approaches: type based (orange the fruit or orange the color), example based (state an e.g. to clarify) and usage based (state a usage to clarify). They designed rules to extract such information from a large corpus
+\item Clarifications questions for intention detection in language - % http://publications.eppe.eu/Trott_etal_Language_Intention_Ro-Man2016.pdf 
+--  prior work section contains a lot of work related to us -- 
+\item Clarification questions by a robot during human-robot dialogue - % http://cs.brown.edu/~stefie10/publications/deits13.pdf 
+\item Idea: We extend our work on stackexchange by modeling multi-turn clarification questions in dialogues? Where we try to resolve some uncertainty by asking questions in multiple rounds. 
+\item Concerns: dataset? Evaluation? Maybe we can extract questions from ubuntu dialogue corpus (or other corpus from IMDB like sitcoms (friends, big bang theory), OR twitter dialogues (recent msr paper on dialogue uses such datasets)
+\end{enumerate}
 
 \subsection{Information augmentation}
 \begin{enumerate}
@@ -627,11 +638,9 @@ Given a post, the next step then is to generate a set of candidate question temp
 \item We define our concrete task as follows: Given a paragraph, say we remove a sentence from the paragraph. The task is given a paragraph (with one of its sentences removed), its RST and given a set of candidate sentences (one of which is the true sentence), identify which sentence when added to the paragraph would add the missing information.
 \item We approach this problem as follows: We take inspiration from Recursive Neural Networks which makes use of the dependency parse tree along with the words of the sentence to model a neural network for downstream tasks like sentiment analysis
 \item Likewise, we propose to use the RST along with the sentences to model a neural network for a discriminative task of identifying the right sentence from the set of candidate sentences
+\item Applications of RST: % https://www.sfu.ca/~mtaboada/docs/Taboada_Mann_RST_Part2.pdf
 \end{enumerate}
 
-\subsubsection{Rhetorical structure theory}
-
-- Applications of RST: https://www.sfu.ca/~mtaboada/docs/Taboada_Mann_RST_Part2.pdf
 
 \iffalse
 - question templates
