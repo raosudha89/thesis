@@ -49,7 +49,7 @@
 \maketitle
 \begin{abstract}
 	
-Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. In our preliminary work, we study the problem of question generation using data from StackExchange, a plentiful online resource in which people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. We build neural network models inspired by the idea of expected value of perfect information: a good question is one whose expected answer is going to be most useful. In this thesis work, we propose to ... 
+Inquiry is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty, a goal of increasing importance in today's automated society. We do a preliminary study using data from StackExchange, a plentiful online resource where people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. We a build neural network model that learns to select an exact question to ask from a candidate set of prior questions. Our model is inspired by the idea of expected value of perfect information: a good question is one whose expected answer is going to be most useful. Furthermore, to build more generalizable systems, we propose two research directions; a template based question generation model and a generative sequence-to-sequence neural network based question generation model.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -67,7 +67,7 @@ Parker could alternatively have asked one of:
 \noindent
 Parker should not ask (b) because it's not useful; they should not ask (c) because it's too specific and an answer of ``No'' gives little help.
 Parker's question (a) is optimal: it is both likely to be useful, and is plausibly answerable by Terry.
-Our goal in this paper is is to automate Parker.
+Our goal in this work is to automate Parker.
 Specifically, after Terry writes their initial post, we aim to generate a clarification question so that Terry can immediately amend their post in hopes of getting faster and better replies.
 \begin{figure}[!t]
 	\centering
@@ -78,58 +78,12 @@ Specifically, after Terry writes their initial post, we aim to generate a clarif
 	\label{askubuntu_post}
 \end{figure}
 %
-Our work has two main contributions: 
-\begin{enumerate}[noitemsep,nolistsep]
-	%\item Identifying the problem of generating clarification questions as a problem worth of study, both in its own right and as part of the larger problem of building naturalistic conversational systems. 
-	\item A novel neural-network model for addressing this task that integrates the notion of expected value of perfect information (\S\ref{model}). % , a classic formalization from AI
-	\item A novel dataset, derived from StackExchange, that enables us to learn a model to ask clarifying questions by looking at the types of questions people ask (\S\ref{dataset_creation}).\footnote{We use data from StackExchange; per license cc-by-sa 3.0, the data is ``intended to be shared and remixed'' (with attribution). We will release all of the data we extract.}
-\end{enumerate}
 
-To develop our model we take inspiration from the decision theoretic framework of the Expected Value of Perfect Information (EVPI), a measure of the value of gathering additional information. In our setting, we use EVPI to calculate which question is most likely to elicit an answer that would make the post more informative.
-Formally, for an input post $p$, we want to choose a question $q$ that maximizes $\mathbb{E}_{a \sim p,q}[\U(p+a)]$, where $a$ is a hypothetical answer and $U$ is a utility function measuring the \emph{completeness} of post $p$ if $a$ were to be added to it.
-To achieve this, we construct two models:
-(1) an answer model, which estimates $\mathbb{P}[a~|~p,q]$, the likelihood of receiving answer $a$ if one were to ask question $q$ on post $p$;
-(2) a completeness model, $\U(p)$, which measures how complete a post is.
-Given these two models, at prediction time we search over a shortlist of possible questions for that which maximizes the EVPI.
+In our preliminary work, we introduce a novel dataset, derived from StackExchange, that enables us to learn a model to ask clarifying questions by looking at the types of questions people ask (\S\ref{dataset_creation}).\footnote{We use data from StackExchange; per license cc-by-sa 3.0, the data is ``intended to be shared and remixed'' (with attribution). We will release all of the data we extract.}. We build a novel neural-network model (\S\ref{model}) inspired from the decision theoretic framework of the Expected Value of Perfect Information (EVPI), a measure of the value of gathering additional information. In our setting, we use EVPI to calculate which question, given a set of candidate questions, is most likely to elicit an answer that would make the post more informative. Formally, for an input post $p$, we want to choose a question $q$ that maximizes $\mathbb{E}_{a \sim p,q}[\U(p+a)]$, where $a$ is a hypothetical answer and $U$ is a function measuring the \emph{utility} of post $p$ if $a$ were to be added to it.
 
-We are able to train these models jointly based on $(p,q,a)$ triples that we extract automatically from StackExchange.
-Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. 
+We train our model based on $(p,q,a)$ triples that we extract automatically from StackExchange. Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. Our preliminary results show significant improvements from using the EVPI formalism over both standard feedforward neural network architectures and bag-of-ngrams baselines.
 
-Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines, even when our system builds on strong information retrieval scaffolding. In comparison, without this scaffolding, the bag-of-ngrams model outperforms the feedforward network. We additionally analyze the difficulty of this task for non-expert humans, and give examples of system output. %on which our system does well, and several on which it does poorly.
-
-
-%Questions posted in the comments section often times include possible solutions or suggestions phrased as a rhetorical question. To filter out such non-clarification questions, we further train a classifier on a small set of questions labelled as clarification/non-clarification using a crowdsourcing platform. We compare the predictions of our model with human judgements obtained on a small held out test set and TODO
-% consisting of initial posts $p$, clarification questions in the comments section
-
-%the first estimates, for any hypothetical answer, how much more \emph{complete} the original post would be if this answer were added to it;
-%the second estimates, for any fixed question, what is the likelihood of a possible ans
-%Figure~\ref{model} depicts the following three components of our EVPI inspired model: 
-%\begin{enumerate}
-%\item For a given unanswered post $p_i$, we generate a set of question candidates $Q_i$ by looking at questions that were asked to posts similar to the unanswered post $p_i$ %(Section~\ref{candidate_question_generator})
-%\item For each of the candidate questions $q_{j} \in Q_i$, we generate an answer representation $a_{j}$ given the unanswered post  $p_i$ and the candidate question $q_{j}$ %(Section~\ref{answer_generator})
-%\item Finally we calculate the utility of each of the updated posts $(p_i + a_{j})$ and output the question that maximized the utility of the updated post %(Section~\ref{utility_calculator})
-%\end{enumerate}
-
-% Our model for $\mathbb{P}[a~|~p,q]$ takes the text of a post $p$ and an answer $q$ and runs them through LSTMs to obtain a single embedding.
-% Answers $a$ are represented using embeddings and the model is trained to minimize the distance between the answer and the embedding of $(p,q)$.
-% The probability model over $a$ then takes the form of a Gaussian centered around the embedding of $(p,q)$.
-% Our model for $U(p+a)$ takes an \emph{average} embedding of the sentences in $p$ and the embedding of $a$ and produces an estimate $U(p+a)$ that ranges in $[0,1]$ for how complete this post is.
-
-% In order to train our model, we use two complementary datasets, one for estimating $\mathbb{P}[a~|~p,q]$ and one for estimating $U(p+a)$.
-% Although these two components are trained on different datasets, they are trained jointly to optimize an answer selection criterea. TODO is this true?
-% To train the answer predictor, we use the \emph{edit history} of StackExchange, as depicted in Figure~\ref{askubuntu_post}. 
-% We extract initial posts $p$, questions from the comments section $q$, and answers from edits to the initial post $a$ to form $(p,q,a)$ triples.
-% To train the completeness predictor, we can use a much larger dataset comprised of posts-which-eventually-get-answers (positive examples for completeness) and posts-which-remain-unanswered (negative examples).
-% Although this labeling is noisy, \newcite{asaduzzaman2013answering} suggest that a primary reason that StackExchange posts remain unanswered is due to incompleteness.
-
-%We train our model using a neural network framework to minimize an objective function defined using EVPI. We compare our model with a bag-of-words baseline and a neural baseline; both which are trained to select the right question given a post and question candidates; without generating an answer for the question. Human judgements on a held out test set of unanswered posts show that our EVPI inspired model can learn to ask questions better.
-
-%We can mine many (post, question, answer) triples from StackExchange's edit histories. In the figure, the initial post fails to state what version of Ubuntu is being run. A person then asked for the Ubuntu version in the comments section. Next, the original poster edited their post, answering the clarification question. Based on this data, we will learn how to choose what question would be most useful to ask. A good question is one whose answer is most likely to help someone respond to the initial request, a notion captured in the theory of expected value of perfect information.
-
-
-%\iffalse
-%-- we show that we can train two different models when we have varied amount of training data? (ask Hal)
-%\fi
+Our preliminary work focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose two new research directions: (1) A template based question generation method where we generate templates like "What version of \_\_\_ are you running?", which is more general than the thousands of specific variants in our data, and then learn how to fill in the blanks based on words in the original post. (2) An encoder-decoder based neural network framework for sequence-to-sequence learning where given a post the encoder encodes the words in the post into a fixed vector representation and the decoder acts as a language model generating the clarification question one word at a time given the context of the post vector. 
 
 \begin{figure*}[t]
 	\centering
@@ -144,10 +98,6 @@ The problem of question generation has received sparse attention from the natura
 
 Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
 \newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
-
-%The problem of question generation has received sparse attention from the natural language processing community. In fact, we know of no work that addresses the problem of generating clarification questions. Most prior work has focused on generating reading comprehension questions \cite{vanderwende2008importance,penas2010filling,heilman2011automatic,olney2012question}: given text, write comprehension questions that one might find on a standardized test. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. 
-%
-%Outside reading comprehension questions, \newcite{labutov2015deep} studied the problem of generating question templates via crowdsourcing, which leads to significantly less data that we can collect. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} consider question generation from images, which may or may not be clarifications TODO note we don't guarantee ours are clarification either :P. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser.
 
 \section{Model description}\label{model}
 
