@@ -99,7 +99,7 @@ The problem of question generation has received sparse attention from the natura
 Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
 \newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
 
-\section{Preliminary work}\label{model}
+\section{Model description}\label{model}
 
 In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$ that we can ask, there is set $A$ of possible answers that could be given. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The value of this question $q$ is the expected utility, over all possible answers. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
 \begin{equation}\label{evpi_equation}
@@ -132,71 +132,6 @@ We use our dataset of \{\textit{post, question, answer}\} triples. Given a $\{p_
 %
  In equation~\ref{eq_answer_generator}, the first term forces the function $F(\bar p_i, \bar q_i)$ to generate an answer representation as close as possible to the correct answer $a_i$. The second term forces the answer representation $F(\bar p_i, \bar q_i)$ to be close to the answer $a_j$ corresponding to a question $q_j$ which is very similar to $q_i$ (i.e. $||\bar{q_i} - \bar{q_j}||$ is near zero).
 
-
-\subsection{Utility calculator}\label{utility_calculator}
-Given a post $p$ and an answer candidate $a_k$, the third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ which measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We train our utility calculator using our dataset of \{\textit{post, question, answer}\} triple. We label all the $(p_i, a_i)$ pairs from our triples dataset with label $y=1$. To get negative samples, we make use of the answer candidates generated using Lucene (\S\ref{question_candidate_generator}). For each $a_k \in A_i$, where $A_i$ is the set of answer candidates for post $p_i$, we label the pair $(p_i, a_k)$ with label $y=0$, except for when $a_k == a_i$. Thus, corresponding to each post $p_i$ in our triples dataset, we get one positive sample and nine negative samples. 
-
-Given a post $p$ and an answer $a$, we use a post LSTM and an answer LSTM to get the neural representation $\bar{p}$ and $\bar{a}$. The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$ where $F$ is a feedforward neural network. We want this utility to be close to 1 for all the positively labelled $(p,a)$ pairs and close to 0 for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
-%
-\begin{align}\label{eq_utility_calculator}
-\textrm{loss}_{\textrm{util}}(y, \bar p, \bar a) &= y \log(\sigma (F(\bar{p}, \bar{a})))
-\end{align}
-
-\subsection{Our joint neural network model}\label{neural_network}
-Our fundamental representation is based on recurrent neural networks over word embeddings. We obtain the word embeddings using a GloVe \cite{pennington2014glove} model trained on the entire datadump of StackExchange. We define three LSTMs corresponding to $p$, $q$ and $a$ and two feedforward neural networks corresponding to our answer model $F(\bar{p},\bar{q})$ and our utility $F(\bar{p}, \bar{a})$. We jointly train the parameters of all our neural network models to minimize the sum of the loss of our answer model (Eq~\ref{eq_answer_generator}) and our utility calculator (Eq~\ref{eq_utility_calculator}):
-%
-\begin{align}
-\sum_i \textrm{loss}_{\textrm{ans}}(\bar p_i, \bar q_i, \bar a_i, Q_i)  
-+  \textrm{loss}_{\textrm{util}}(y_i, \bar p_i, \bar a_i)
-\end{align}
-%
-Given such an estimate $\mathbb{P}[a|p,q]$ of an answer and a utility $\U(p+a)$ of the updated post, predictions (i.e., selecting a question from a set of candidate questions) can be done by choosing that ``$q$'' that maximizes Eq~\ref{evpi_equation}. 
-
-\section{Dataset creation}\label{dataset_creation}
-StackExchange is a network of online question answering websites about varied topics like academia, ubuntu operating system, latex, etc. The sites are modeled after StackOverflow, a popular platform used for asking and answering questions on a wide range of topics in computer programming. The data dump of StackExchange contains timestamped information about the posts, comments on the post and the history of the revisions made to the post. We use this data dump to create our dataset of \{\textit{post, question, answer}\} triples: where the \textit{post} is the initial unedited post, the \textit{question} is the comment containing a question and the \textit{answer} is the edit made to the post that matches the question comment. \\
-\textbf{Extract posts:} We use the post histories to identify posts that have been updated by its author. We use the timestamp information to retrieve the initial unedited version of the post.\\
-\textbf{Extract questions:} For each such initial version of the post, we use the timestamp information of its comments to identify the first comment made to the post. We look for a question mark `?' token to further identify if its a question comment. Finally, we truncate the comment till the question mark token to retrieve the question part of the comment.\\
-\textbf{Extract answers:} In our final step, we identify the edit made to the post in response to the question comment. Authors make edits to their posts for several reasons; including stylistic updates and grammatical corrections. Therefore, we use only those edits that are longer than four words and finally use the timestamp information of the edit to match the edits to their respective question comments.
-
-%We extract a total of 38,041 (\textit{post, question, answer}) triples from StackExchange which are distributed across three domains: askubuntu (13,749), unix (6656), and superuser (17,636). We train our models using 80\% of the data, tune our hyper parameters using 10\% of the data and evaluate our models using the remaining 10\% of the data. Table~\ref{data_statistics} shows the sizes of the train, dev and test splits for the three domains. 
-\begin{table}
-	\centering
-	\begin{tabular}{lccc}
-		\toprule
-		& Train & Dev & Test  \\
-		\midrule
-		askubuntu & 10,992 & 1374 & 1375\\
-		unix & ~~~5324 & ~~666 & ~~666 \\
-		superuser & 14,828 & 1404 & 1404 \\
-		\bottomrule
-	\end{tabular}
-	\label{data_statistics}
-	\caption{Table above shows the sizes of the train, dev and test split of our dataset for three domains.}
-\end{table}
-
-A natural question to our process of data creation would be how often is the extracted question a clarification question. We sample a set of 1400 questions from our dataset and design a crowdsourced task where given a question we ask a human to choose whether: a) It is a clarification question, b) It provides an answer or a suggestion; or c) Neither.  63\% of the questions are marked as clarification question, 33\% of them are marked as questions that provides an answer or a suggestion and 4\% of them are marked as neither. The inter-annotator agreement (PAA) is above 90\%. These numbers suggest that although a greater percentage of the extracted questions are clarification questions, our data is imperfect: it includes some non-clarification questions.
-
-
-
-\section{Experimental Results}\label{experiments_results}
-Our primary research questions that we evaluate experimentally are:
-%
-\begin{enumerate}[noitemsep,nolistsep]
-	\item Does a neural architecture with learned representations improve upon a simple bag-of-ngrams baseline?
-	
-	\item Does the expected value of perfect information (EVPI) formalism provide leverage over a similarly expressive feed-forward network? %In particular, is EVPI a useful inductive bias for a model?
-	
-	\item In the EVPI formulation, is it useful to compute an expectation over answers, rather than just picking a single question/answer pair?
-	
-	\item How well does our model perform in comparison to non-expert humans?
-	
-	\item How much harder is the task when the (distrator) candidate questions come from Lucene rather than selected randomly?\footnote{A common strategy with the Ubuntu dialogue corpus \cite{lowe2015ubuntu} is to train a dialogue system by choosing a best response given a context of a conversation and a set of candidate responses. However, these methods generate their candidates from their dataset using random sampling. This plausibly makes the task significantly easier than using Lucene to select candidates, which are much more likely to be confusable and have high lexical overlap.}
-\end{enumerate}
-
-% In contrast, we generate our candidates using Lucene, a well-known information retrieval system, and so our candidate questions are more closer to each other than a randomly sampled questions would have been. Thus, we indirectly define a harder task. To compare how our models perform in an easier configuration, we design our experiments on two task setups (Section~\ref{task_setup}). To understand the leverage our EVPI inspired model gets us, we compare our model with non-neural baselines and feedforward neural baselines (Section~\ref{baselines}). 
-
-% Further, we design another experiment where in equation~\ref{evpi_equation}, instead of choosing the question that maximizes the expected utility over all possible answers (EVPI max), we choose the question whose answer has the maximum utility (EVPI sum). This experiment helps us understand the leverage we are getting by summing over all our answer candidates, further strengthening the case for our EVPI inspired model. 
-
 \begin{table*}[t]
 	\small
 	\centering
@@ -208,116 +143,84 @@ Our primary research questions that we evaluate experimentally are:
 		Random  & 10.0 & 29.3 & 30.0 & 50.0 &10.0 & 29.3 & 30.0 & 50.0 \\
 		Bag-of-ngrams & 11.6 & 31.3 & 32.5 & 54.6 & 54.9 & 70.5 & 83.1 & 92.0 \\
 		Feed-forward & 17.4 & 37.8 & 43.2 & 63.9 &  49.0 & 66.8 & 81.3 & 92.8 \\
-		EVPI max  & 21.1 & 41.2 & 48.0 & 66.9  & 48.8 & 65.5 & 77.2 & 89.9 \\
-		EVPI sum & \bf 23.3 & \bf 43.4 & \bf 51.0 & \bf 70.3 & \bf 61.1 & \bf 75.5 & \bf 87.9  & \bf 95.8  \\
+		EVPI & \bf 23.3 & \bf 43.4 & \bf 51.0 & \bf 70.3 & \bf 61.1 & \bf 75.5 & \bf 87.9  & \bf 95.8  \\
 		\bottomrule
 	\end{tabular}
 	\label{results_topN}
-	\caption{Results of our two setups `Lucene negative candidates' and `Random negative candidates' on askubuntu test split when the model is trained on a combination of askubuntu, unix and superuser train splits}
+	\caption{Results of two setups `Lucene negative candidates' and `Random negative candidates' on askubuntu when trained on a combination of three domains: askubuntu, unix and superuser.  We report four metrics: accuracy (percent of time the top ranked question was correct),
+		mean reciprocal rank (the reciprocal of the ranked position of the correct question in the top 10 list), recall at 3 (percent of time the correct answer is in the top three) and
+		recall at 5.}
 \end{table*}
 
+\subsection{Utility calculator}\label{utility_calculator}
+Given a post $p$ and an answer candidate $a_k$, the third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ which measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We train our utility calculator using our dataset of \{\textit{post, question, answer}\} triple. We label all the $(p_i, a_i)$ pairs from our triples dataset with label $y=1$. To get negative samples, we make use of the answer candidates generated using Lucene (\S\ref{question_candidate_generator}). For each $a_k \in A_i$, where $A_i$ is the set of answer candidates for post $p_i$, we label the pair $(p_i, a_k)$ with label $y=0$, except for when $a_k == a_i$. Thus, corresponding to each post $p_i$ in our triples dataset, we get one positive sample and nine negative samples. 
 
-\subsection{Task setups}\label{task_setup}
+Given a post $p$ and an answer $a$, we use a post LSTM and an answer LSTM to get the neural representation $\bar{p}$ and $\bar{a}$. The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$ where $F$ is a feedforward neural network. We want this utility to be close to 1 for all the positively labelled $(p,a)$ pairs and close to 0 for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
+%
+\begin{align}\label{eq_utility_calculator}
+\textrm{loss}_{\textrm{util}}(y, \bar p, \bar a) &= y \log(\sigma (F(\bar{p}, \bar{a})))
+\end{align}
 
-\textbf{Lucene negative candidates:} In this setup, given a post $p$, we label the question $q$ paired with $p$ in our dataset of $(p, q, a)$ triples as positive. To get our negative candidates, we retrieve nine additional question candidates using Lucene (as described in Section~\ref{question_candidate_generator}).\\
-\textbf{Random negative candidates:} In this setup, given a post $p$, we label the question $q$ paired with $p$ in our dataset of $(p, q, a)$ triples as positive as in the previous setting. To get our negative candidates, we randomly sample nine other questions from our dataset of $(p, q, a)$ triples.\footnote{In all cases we train 100-d word embeddings using GloVe \cite{pennington2014glove} on the 3 billion token datadump of StackExchange. We use a threshold frequency of 100 to create our vocabulary of ~250,000 tokens. For our feed-forward neural network, we use two fully-connected dense hidden layers each of size 100. We use ReLU \cite{nair2010rectified} non-linearity as our activation function between the hidden layers.}
+\subsection{Our joint neural network model}\label{neural_network}
+Our fundamental representation is based on recurrent neural networks over word embeddings obtained using a GloVe \cite{pennington2014glove} model trained on the entire datadump of StackExchange. We define three LSTMs corresponding to $p$, $q$ and $a$ and two feedforward neural networks corresponding to our answer model $F(\bar{p},\bar{q})$ and our utility calculator $F(\bar{p}, \bar{a})$. We jointly train the parameters of all our neural network models to minimize the sum of the loss of our answer model (Eq~\ref{eq_answer_generator}) and our utility calculator (Eq~\ref{eq_utility_calculator}):
+%
+\begin{align}
+\sum_i \textrm{loss}_{\textrm{ans}}(\bar p_i, \bar q_i, \bar a_i, Q_i)  
++  \textrm{loss}_{\textrm{util}}(y_i, \bar p_i, \bar a_i)
+\end{align}
+%
+Given such an estimate $\mathbb{P}[a|p,q]$ of an answer and a utility $\U(p+a)$ of the updated post, predictions can be done by choosing that ``$q$'' that maximizes Eq~\ref{evpi_equation}. 
 
+\section{Experiments and Results}
+
+\subsection{Dataset}\label{dataset_creation}
+StackExchange is a network of online question answering websites containing timestamped information about the posts, comments on the post and the history of the revisions made to the post. Using this, we create our dataset of \{\textit{post, question, answer}\} triples: where \textit{post} is the initial unedited post, \textit{question} is the comment containing a question and \textit{answer} is the edit made to the post that matches the question comment. We extract a total of 37K triples from the following three domains of StackExchange: askubuntu, unix and superuser.
+
+\subsection{Preliminary research questions}\label{experiments_results}
+\begin{enumerate}[noitemsep,nolistsep]
+	\item Does a neural architecture improve upon a simple bag-of-ngrams baseline?
+	
+	\item Does the EVPI formalism provide leverage over a similarly expressive feed-forward network? %In particular, is EVPI a useful inductive bias for a model?
+	
+	\item How much harder is the task when the negative candidate questions come from Lucene rather than selected randomly?
+\end{enumerate}
+
+\subsection{Experimental setups}\label{task_setup}
+For every post $p$ in our dataset of $(p, q, a)$ triples, we label the question $q$ paired with $p$ as positive. We define our two setups based on how we get our negative question candidates for every $p$:\\
+\textbf{Lucene negative candidates:} We retrieve nine question candidates using Lucene (\S\ref{question_candidate_generator}).\\
+\textbf{Random negative candidates:} We randomly sample nine other questions from our dataset.
 
 \subsection{Baseline methods}\label{baselines}
 
-We compare our model with the following baselines:\\
-\textbf{Random baseline:} Given a post, we randomly permute its set of 10 candidate questions uniformly.\\
-\textbf{Bag-of-ngrams baseline:} Given a post and a set of 10 question question and answer candidates, we construct a bag-of-ngrams representation for the post, the question and the answer. Our bag-of-ngrams baseline is then trained to minimize hinge loss on misclassification loss using cross-product features between each of (\textit{post, question}), (\textit{question, answer}) and (\textit{post, answer}). We tune the ngram length and the learning rate and choose the setting that performs best on development data.\\
-\textbf{Neural network baseline using post, question and answer:} We concatenate the post LSTM representation, the question LSTM representation and the answer LSTM representation and feed it through a feed forward neural network of two fully-connected hidden layers to get our neural baseline. 
-
-\subsection{Dataset}\label{dataset}
-We evaluate our model and our baselines on the following three domains of StackExchange: askubuntu, unix and superuser.
-% \begin{description}
-% \item[askubuntu:]  A question and answer site for users of the Ubuntu Operating system where people post queries about issues they face while using Ubuntu. An example question on this site: ``\textsf{\small Why isn't Chromium up-to-date in all the Ubuntu LTS repos, like Firefox is?}''
-% \item[unix:]  A question and answer site for users of Linux, FreeBSD and other unix-like operating systems. This site would contain questions like the ones in askubuntu and more. An example question on this site: ``\textsf{\small How to repeatedly alternate between two (or more) commands?}''
-% \item[superuser:] A question and answer site for users of all kinds of operating systems and computer applications. An example question on this site: ``\textsf{\small What is the LAST version of Windows Operating system that can run DOS applications natively?}''
-% \end{description}
-%
-Table~\ref{data_statistics} shows the data statistics for the four sites above.  Although StackExchange consists of many sites, we choose the ones above because: a) The data dump available for them were moderately big in size to train a model on; b) These domains contain clarifications questions that are generic enough to be useful for many different posts; and finally c) The three domains were close enough so that we could combine them to create our full dataset of ~37K triples.
-
-%\subsection{Experimental details}
-
-%\paragraph{Preprocessing:} Each post, question and answer in our dataset of $(post, question, answer)$ triples is represented using embeddings. To generate these embeddings, we first tokenize the raw text in our post, question and answer. We restrict our post to be just the first 100 tokens of the post and our question and answer to be first 10 of their tokens respectively. Given these tokens we then use our word embeddings model to generate their embeddings.
-
-%\paragraph{Word embedding model:} We train 100 dimensional word embeddings using GloVe \cite{pennington2014glove} on the 3 billion token datadump of StackExchange. We use a threshold frequency of 100 to create our vocabulary of ~250,000 tokens. 
-%We then train a GloVe model on the datadump to get embeddings of size 100 for each token in our vocabulary. All tokens with a frequency of less than 100 in our dataset get assigned an `UNK'  token.
-
-%\paragraph{Model hyperparameters:}  For our feed-forward neural network, we use two fully-connected dense hidden layers each of size 100. We use ReLU \cite{nair2010rectified} non-linearity as our activation function between the hidden layers. 
+ Given a post, we randomly permute its set of 10 candidate questions uniformly to get our random baseline. For our bag-of-ngrams baseline,  we construct a bag-of-ngrams representation for the post, the question and the answer and train a classifier to minimize hinge loss on misclassification loss. For our feedforward neural baseline, we concatenate the post LSTM representation, the question LSTM representation and the answer LSTM representation and feed it through a feed forward neural network of two fully-connected hidden layers.
 
 \subsection{Results}
 
-We first describe results on the union of all data, summarized in Table~\ref{results_topN}.
-We report four metrics: accuracy (percent of time the top ranked question was correct),
-mean reciprocal rank (the reciprocal of the ranked position in the top ten list that the correct question is), 
-recall at 3 (percent of the the correct answer is in the top three) and
-at 5.
-
-The left half of this table shows results when the candidate sets is from Lucene---the ``hard'' setting.
+We describe results on a test split of askubuntu when our models are trained on the union of all data, summarized in Table~\ref{results_topN}. The left half of this table shows results when the candidate sets is from Lucene---the ``hard'' setting.
 Here, we see that for all the evaluation metrics:
-EVPI using the sum (expectation over $a$) outperforms
-EVPI using the max $a$;
-which outperforms the neural feedforward model that does not incorporate the EVPI formalism;
+EVPI outperforms the neural feedforward model that does not incorporate the EVPI formalism;
 which outperforms the bag-of-ngrams baseline;
 which outperforms the random baseline.
 The gains in all cases are relatively large: at least a few percentage points.
-A final performance of 51\% recall at 3 is encouraging, though clearly there is a long way to go for a perfect system.
+A final performance of 51\% recall at 3 is encouraging, though clearly there is a long way to go for a perfect system. The right half of this table shows the same results when the candidate set is chosen randomly---the ``easy'' setting.
 
-The right half of this table shows the same results when the candidate set is chosen randomly---the ``easy'' setting.
-A major difference in the results here is that the bag-of-ngrams system now \emph{outperforms} both the feedforward neural model and the EVPI using max instead of expectation.
-This likely happens because just picking up on word overlap---when Lucene has not already done this for us---works remarkably well.
-Nonetheless, in all of the metrics, the true EVPI model outperforms all the baselines, achieving at least a 3\% gain over the bag-of-ngrams baseline.
+\section{Proposed research directions}
 
-In Table~\ref{results_topM} (supplementary materials), we show results when we work not with the union of all the data, but with each data set individually.
-%The top half is against Lucene candidate, the bottom half is against random candidates.
-The main observation is that the trends are essentially the same as before: for Lucene negative candidates, bag-of-ngrams underperforms feedfoward, which underperforms EVPI.
-This happens because more data helps, and these three domains are sufficiently similar that the additional data---even if it is slightly domain mismatched---is better than nothing.
-%The second observation is that the results for EVPI are lower across the board, with the exception of superuser on random negative examples.% (which is sometimes better, sometimes worse).
+In our preliminary work, we focused on building a model that can learn to select a question to ask from a candidate set of prior questions. To make the system more general, it needs to be able to generalize to new context well. Towards this goal, we propose two new research directions:
 
-\subsection{How well can humans do this task?}
+\subsection{Template based question generation}
 
-In this section we address two natural questions:
-(1) how does the performance of our system compare to a human solving the same task?
-(2) just because the system selects a question that is not the exact gold standard question, is it certainly wrong?
-To answer these questions, we had 14 computer science graduate students perform an annotation task on $50$ examples.
-Most of these graduate students are \emph{not} experts in unix or ubuntu, but all are knowledgable.
-We provided them with a post and a randomized list of ten possible questions.
-They were instructed to select what they thought was the \emph{single} best question to ask, and additionally mark as ``valid'' any additional questions that they thought would also be okay to ask.
-We also asked annotators to rate their confidence in $\{0,1,2,3\}$.
-Most found this task quite challenging because many of the questions are about subtle nuances of operating system behavior.
+ Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We identify four components to our template based question generation method:
+\begin{enumerate}[noitemsep,nolistsep]
+	\item Identifying near similar questions from a huge collection of questions
+	\item Generating templates from near similar questions
+	\item Given a post, selecting the right question template from a set of candidate templates
+	\item Filling in the blanks in the template using relevant context from the given post.
+\end{enumerate}
 
-These annotator's accuracy on the ``hard'' task of Lucene-selected questions, was only 36\%, significantly better than our best system (23\%), but still far from perfect.
-If we limited to those examples on which they were more confident (confidence of 2 or 3), their accuracy raised to 42\%, but never surpassed that.
-A major problem for the human annotators is the amount of background knowledge required to solve this problem.
-On an easier domain, or with annotators who are truly experts, we might expect these numbers to be higher.
+For identifying similar questions, we plan to use clustering algorithms which cluster documents based on their similarity. Given a set of questions that are near similar, the next step is to extract a generic template which can be expanded to (almost) each of the variants in the cluster. We use the parts-of-speech information of the words in the question to identify proper nouns (and others) that indicate specific topics. Given these markings, we remove them from the questions to generate a template. Further, we classify questions into probable question types using an idea similar to \cite{}. Given a post, the next step then is to generate a set of candidate question templates and then to select the most relevant question template from the set of candidates. We use our previous model for this step.
 
-The average number of ``valid'' answers for a single post according to the (admittedly non-expert) annotators was 4.26 (out of ten); the distribution was fairly symmetric and quickly decaying around that number (the median is four).
-In the data, 56\% of the examples had at most four options marked as valid; 
-28\% had at most 3; 14\% had at most 2; and 6\% had only one valid option (which by definition is also the ``best'' option).
-These numbers suggest that an evaluation strategy that takes validity---and not just raw accuracy---is a useful avenue for future research.
-
-
-\subsection{Example Outputs}
-
-To understand the behavior of the model, we have included five example outputs as supplementary material.
-Table~\ref{tab:examples_good} shows two examples in which our model succeeds in selecting the correct question.
-In the first, the original poster is asking a question about SSD data and hardware.
-The model correctly asks about uefi (the Unified Extensible Firmware Interface, which replaces BIOS), and ranks that output significantly higher than its second guess.
-This is particularly impressive since the question mentions neither uefi nor bios. Human annotators said that the third and fifth outputs would also be valid. In the second example, a user is having significant difficulty getting their Ubuntu installation to work, and the model correctly asks about the error of \texttt{\small apt-get install}.
-Several other options were marked as valid by annotators in this case as well.
-
-Table~\ref{tab:examples_bad} shows three examples of errors.
-In the first example (about sound), the model
-completely misses (ranks in last place) the true question about \texttt{\small linux-firmware-nonfree}.
-The model instead asks about Pulseaudio, considered a valid question by annotators.
-In the second example, the truth is about \texttt{\small apt-get update} but the model instead asked for the ubuntu version (generally a safe bet, and considered valid). %In this case the model fared better and put the correct question in second position.
-In the third example, the model asks far too specific a question about \texttt{\small sslstrip-0.9.tar.gz}, rather than the more debugging question which it should have asked about (in position two).
-In this case, it's guess was invalid.
-
+\subsection{Neural network generative model}
 
 \section{Conclusion}
 
