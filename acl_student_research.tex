@@ -99,46 +99,30 @@ The problem of question generation has received sparse attention from the natura
 Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
 \newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
 
-\section{Model description}\label{model}
+\section{Preliminary work}\label{model}
 
 In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$ that we can ask, there is set $A$ of possible answers that could be given. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The value of this question $q$ is the expected utility, over all possible answers. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
 \begin{equation}\label{evpi_equation}
 \argmax_{q \in Q} \sum_{a \in A} \mathbb{P}[a | p,q] \U(p+a)
 \end{equation} 
 
-In Eq~\ref{evpi_equation}, $p$ is the post, $q$ is a potential question from a set of candidate questions $Q$ and $a$ is a potential answer from a set of candidate questions $A$. $\mathbb{P}[a | p,q]$ measures the probability of getting an answer $a$ given an initial post $p$ and a clarifying question $q$. $\U(p+a)$ is a utility function that measures how useful it would be if $p$ were augmented with answer $a$. In our case, the utility function we use is the completeness of the post: a post has high utility the more complete it is. This captures the right intuition in the example questions (from Section~\ref{introduction}) that Parker could have asked such that: \textsf{\small (a)} will have good utility for many likely answers;
-\textsf{\small (b)} will have low utility regardless of the answer; and
-\textsf{\small (c)} will have high utility only for a low probability answer.
-
-The modeling question then is how to model: 
-%\begin{enumerate}[noitemsep,nolistsep]
-(1) the probability distribution $\mathbb{P}[a | p,q]$ and
-(2) the utility/completeness function $\U(p+a)$.
-In our work, both will be represented using neural networks over the appropriate inputs. Posts, questions and answers will all be represented as embeddings. We train the parameters of the two models jointly to minimize a joint loss defined such that an answer that has a higher potential of increasing the utility of a post gets a higher probability.
-
-Figure~\ref{model} describes the behavior of our model during test time. 
-Given a post $p$, our first step is to generate a set of candidate questions and a set of candidate answers (Section~\ref{question_candidate_generator}).
-Given a post $p$ and a question candidate $q_i$, our second step is to calculate how likely is this question to be answered using one of our answer candidates $a_k$ (Section~\ref{answer_modeling}).
-Given a post $p$ and an answer candidate $a_k$, the third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ (Section~\ref{utility_calculator})
-Finally, using these pieces, we build a joint neural network that we can optimize end-to-end over our data (Section~\ref{neural_network}).
+In Eq~\ref{evpi_equation}, $p$ is the post, $q$ is a potential question from a set of candidate questions $Q$ (\S\ref{question_candidate_generator}) and $a$ is a potential answer from a set of candidate questions $A$ (\S\ref{question_candidate_generator}). $\mathbb{P}[a | p,q]$ (\S\ref{answer_modeling}) measures the probability of getting an answer $a$ given an initial post $p$ and a clarifying question $q$. $\U(p+a)$ (\S\ref{utility_calculator}) measures how useful it would be if $p$ were augmented with answer $a$. Finally, using these pieces, we build a joint neural network that we can optimize end-to-end over our data (\S\ref{neural_network}). Figure~\ref{model} describes the behavior of our model during test time. 
 
 \subsection{Question \& answer candidate generator}\label{question_candidate_generator}
 
-Given a post $p$, our first step is to generate a set of candidate questions and a set of candidate answers. One way that humans learn to ask questions is by looking at how others ask questions in a similar situation. Using this intuition we generate question candidates for a given post by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene\footnote{\url{https://lucene.apache.org/}}, a software extensively used in information retrieval for extracting documents relevant to a given query from a pool of documents. Lucene also ranks the extracted documents according to their relevance to the query. We use Lucene to find the top 10 most similar posts to a given post from our dataset (Section~\ref{dataset_creation}) \footnote{The top most similar candidate to a post is the original post itself}. We consider the questions asked to these 10 posts as our set of question candidates and the edits made to the posts in response to the questions as our set of answer candidates. Section~\ref{dataset_creation} describes the process of extracting the (\textit{post, question, answer}) triples from the StackExchange datadump. 
-
-\begin{figure*}[ht]
-	\centering
-	\includegraphics[width=0.9\textwidth]{answer_generator}
-	\caption{Training of our answer generator. Given a post $p_i$ and its question $q_i$, we generate an answer representation that is not only close to its correct answer $a_i$, but also close to one of its candidate answers $a_j$ if the candidate question $q_j$ is close to the true question $q_i$.}
-	\label{fig_answer_generator}
-\end{figure*}
+ One way that humans learn to ask questions is by looking at how others ask questions in a similar situation. Using this intuition we generate question candidates for a given post by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene\footnote{\url{https://lucene.apache.org/}}, a software extensively used in information retrieval, to find the top 10 most similar posts to a given post from our dataset \footnote{The top most similar candidate to a post is the original post itself}. We consider the questions asked to these 10 posts as our set of question candidates and the edits made to the posts in response to the questions as our set of answer candidates.
 
 \subsection{Answer modeling}\label{answer_modeling}
 
-Given a post $p$ and a question candidate $q_i$, our second step is to calculate how likely is this question to be answered using one of our answer candidates $a_k$. To calculate this probability, we first generate an answer representation using $p$ and $q_i$ and then measure how close is the answer candidate $a_k$ to our answer representation. To model our answer generator we use the following intuition: a question can be asked in several different ways. For e.g. in Figure~\ref{askubuntu_post}, the question ``\textsf{\small What version of Ubuntu do you have?}'' can be asked in other ways like ``\textsf{\small What version of operating system are you using?}'', ``\textsf{\small Version of OS?}", etc.  
+Given a post $p$ and a question candidate $q_i$, our second step is to calculate how likely is this question to be answered using one of our answer candidates $a_k$. To calculate this probability, we first generate an answer representation $F(p,q_i)$ and then measure how close is the answer candidate $a_k$ to our answer representation using the equation:
+\begin{align}
+\mathbb{P}[a_k |p,q_i]  
+&= \frac 1 Z \exp\left[- \lambda || a_k  -  F(p,q_i) ||^2\right]
+\end{align}
+where $\lambda$ is a tunable parameter that controls the variance of the distribution. To model our answer generator we use the following intuition: a question can be asked in several different ways. For e.g. in Figure~\ref{askubuntu_post}, the question ``\textsf{\small What version of Ubuntu do you have?}'' can be asked in other ways like ``\textsf{\small What version of operating system are you using?}'', ``\textsf{\small Version of OS?}", etc.  
 Additionally, for a given post and a question, there can be several different answers to that question. For instance, ``\textsf{\small Ubuntu 14.04 LTS}", ``\textsf{\small Ubuntu 12.0}", ``\textsf{\small Ubuntu 9.0}", are all valid answers. We train our answer generator to generate an answer representation capturing these generalizations.
 
-We use our dataset of \{\textit{post, question, answer}\} triples (Section~\ref{dataset_creation}). Given a $\{p_i, q_i, a_i\}$ triple, we use a long short-term memory architecture (LSTM) \cite{hochreiter1997long} to get to their respective neural hidden representations $\{\bar p_i, \bar q_i, \bar a_i\}$.  Given $(\bar p_i, \bar q_i)$, we define a feed-forward neural network $F$ that combines the post and question representations to get an answer representation $F(\bar p_i, \bar q_i)$. We train our answer generator to minimize the loss function below:
+We use our dataset of \{\textit{post, question, answer}\} triples. Given a $\{p_i, q_i, a_i\}$ triple, we use a long short-term memory architecture (LSTM) \cite{hochreiter1997long} to get to their respective neural hidden representations $\{\bar p_i, \bar q_i, \bar a_i\}$.  Given $(\bar p_i, \bar q_i)$, we define a feed-forward neural network $F$ that combines the post and question representations to get an answer representation $F(\bar p_i, \bar q_i)$. We train our answer generator to minimize the loss function below:
 %
 \begin{align}\label{eq_answer_generator}
 \textrm{loss}_{\textrm{ans}}(\bar p, \bar q, \bar a, Q) 
@@ -146,40 +130,27 @@ We use our dataset of \{\textit{post, question, answer}\} triples (Section~\ref{
 &\hspace{-25mm} +  \sum_{j \in Q} \Big ( {|| F(\bar p, \bar q) - \bar{a_j} ||}^2  (1 - \tanh{(|| \bar q - \bar{q_j} ||^2)}) \Big ) \Big \} &\nonumber
 \end{align}
 %
-This loss function can be explained using the example in figure~\ref{fig_answer_generator}. Question $q_i$ is the question paired with the given post $p_i$. In equation~\ref{eq_answer_generator}, the first term forces the function $F(\bar p_i, \bar q_i)$ to generate an answer representation as close as possible to the correct answer $a_i$. Now, a question can be asked in several different ways. Let $Q_i$ be the set of candidate questions for post $p_i$, retrieved from the dataset using Lucene (Section~\ref{question_candidate_generator}). Suppose a question candidate $q_j$ is very similar to the correct question $q_i$ ( i.e. $|| \bar q_i - \bar{q_j} ||$ is near zero). Then the second term forces the answer representation $F(\bar p_i, \bar q_i)$ to be close to the answer $a_j$ corresponding to the question $q_j$ as well. Thus in the figure~\ref{fig_answer_generator}, the answer representation will be close to $a_j$ (since $q_j$ is similar to $q_i$), but far off from $a_k$ (since $q_k$ is dissimilar to $q_i$).
+ In equation~\ref{eq_answer_generator}, the first term forces the function $F(\bar p_i, \bar q_i)$ to generate an answer representation as close as possible to the correct answer $a_i$. The second term forces the answer representation $F(\bar p_i, \bar q_i)$ to be close to the answer $a_j$ corresponding to a question $q_j$ which is very similar to $q_i$ (i.e. $||\bar{q_i} - \bar{q_j}||$ is near zero).
 
-Given such an answer representation, we then define the probability distribution over candidate answers $a_k \in A$ as: 
-\begin{align}
-\mathbb{P}[a_k |p_i,q_j]  
-&= \frac 1 Z \exp\left[- \lambda || a_k  -  F(p_i,q_j) ||^2\right]
-\end{align}
-where $\lambda$ is a tunable parameter that controls the variance of the distribution.
 
 \subsection{Utility calculator}\label{utility_calculator}
-Given a post $p$ and an answer candidate $a_k$, the third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$. As expressed in equation~\ref{evpi_equation}, this utility function measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We train our utility calculator using our dataset of \{\textit{post, question, answer}\} triples (Section~\ref{dataset_creation}). We label all the $(p_i, a_i)$ pairs from our triples dataset with label $y=1$. To get negative samples, we make use of the answer candidates generated using Lucene as described in Section~\ref{question_candidate_generator}. For each $a_k \in A_i$, where $A_i$ is the set of answer candidates for post $p_i$, we label the pair $(p_i, a_k)$ with label $y=0$, except for when $a_k == a_i$. Thus, corresponding to each post $p_i$ in our triples dataset, we get one positive sample and nine negative samples. 
+Given a post $p$ and an answer candidate $a_k$, the third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ which measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We train our utility calculator using our dataset of \{\textit{post, question, answer}\} triple. We label all the $(p_i, a_i)$ pairs from our triples dataset with label $y=1$. To get negative samples, we make use of the answer candidates generated using Lucene (\S\ref{question_candidate_generator}). For each $a_k \in A_i$, where $A_i$ is the set of answer candidates for post $p_i$, we label the pair $(p_i, a_k)$ with label $y=0$, except for when $a_k == a_i$. Thus, corresponding to each post $p_i$ in our triples dataset, we get one positive sample and nine negative samples. 
 
-Given a post $p$ and an answer $a$, we use a post LSTM and an answer LSTM to get the neural representation $\bar{p}$ and $\bar{a}$. We define a feedforward neural network that combines the post neural representation $\bar{p}$ and the answer neural representation $\bar{a}$ to get the updated post representation $F(\bar{p}, \bar{a})$. The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$. We want this utility to be close to 1 for all the positively labelled $(p,a)$ pairs and close to 0 for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
+Given a post $p$ and an answer $a$, we use a post LSTM and an answer LSTM to get the neural representation $\bar{p}$ and $\bar{a}$. The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$ where $F$ is a feedforward neural network. We want this utility to be close to 1 for all the positively labelled $(p,a)$ pairs and close to 0 for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
 %
 \begin{align}\label{eq_utility_calculator}
 \textrm{loss}_{\textrm{util}}(y, \bar p, \bar a) &= y \log(\sigma (F(\bar{p}, \bar{a})))
 \end{align}
 
 \subsection{Our joint neural network model}\label{neural_network}
-Our fundamental representation is based on recurrent neural networks over word embeddings. We obtain the word embeddings using a GloVe \cite{pennington2014glove} model trained on the entire datadump of StackExchange. Given an initial post $p$, we generate a post neural representation $\bar{p}$ using a post LSTM i.e. long short-term memory architecture \cite{hochreiter1997long} as shown in the figure~\ref{lstm}. Similarly, given a question $q$ and an answer $a$, we generate a question neural representation $\bar{q}$ and a answer neural representation $\bar{a}$ using a question LSTM and an answer LSTM respectively. We define the function $F$ as a feedforward neural network on its input with two fully-connected hidden layers. So the function $F(\bar{p},\bar{q})$ in our answer model would be a feedforward neural network on the inputs $\bar{p}$ and $\bar{q}$ and the function $F(\bar{p}, \bar{a})$ in our utility calculator would be a feedforward neural network on the inputs $\bar{p}$ and $\bar{a}$. We train the parameters of the three LSTMs corresponding to $p$, $q$ and $a$, and the parameters of the two feedforward neural networks jointly to minimize the sum of the loss of our answer model (Eq~\ref{eq_answer_generator}) and our utility calculator (Eq~\ref{eq_utility_calculator}):
+Our fundamental representation is based on recurrent neural networks over word embeddings. We obtain the word embeddings using a GloVe \cite{pennington2014glove} model trained on the entire datadump of StackExchange. We define three LSTMs corresponding to $p$, $q$ and $a$ and two feedforward neural networks corresponding to our answer model $F(\bar{p},\bar{q})$ and our utility $F(\bar{p}, \bar{a})$. We jointly train the parameters of all our neural network models to minimize the sum of the loss of our answer model (Eq~\ref{eq_answer_generator}) and our utility calculator (Eq~\ref{eq_utility_calculator}):
 %
 \begin{align}
 \sum_i \textrm{loss}_{\textrm{ans}}(\bar p_i, \bar q_i, \bar a_i, Q_i)  
 +  \textrm{loss}_{\textrm{util}}(y_i, \bar p_i, \bar a_i)
 \end{align}
 %
-Given such an estimate $\mathbb{P}[a|p,q]$ of an answer and a utility $\U(p+a)$ of the updated post, predictions (i.e., selecting a question from a set of candidate questions) can be done by choosing that ``$q$'' that maximizes Eq~\ref{evpi_equation}. The remaining question, then, is how to get data that enables us to train our answer model and our utility calculator. Given data, the training becomes a multitask learning problem, where we learn simultaneously to predict utility and to estimate the probability of answers.
-
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.27]{lstm}
-	\caption{{\small Our LSTM architecture on a post $p_i$. The input layer consists of pre-trained word embeddings of the words in the post which is fed into a single hidden layer. The output $o_k$ of each of the hidden states is averaged together to get our neural representation $\bar p_i$}}
-	\label{lstm}
-\end{figure}
+Given such an estimate $\mathbb{P}[a|p,q]$ of an answer and a utility $\U(p+a)$ of the updated post, predictions (i.e., selecting a question from a set of candidate questions) can be done by choosing that ``$q$'' that maximizes Eq~\ref{evpi_equation}. 
 
 \section{Dataset creation}\label{dataset_creation}
 StackExchange is a network of online question answering websites about varied topics like academia, ubuntu operating system, latex, etc. The sites are modeled after StackOverflow, a popular platform used for asking and answering questions on a wide range of topics in computer programming. The data dump of StackExchange contains timestamped information about the posts, comments on the post and the history of the revisions made to the post. We use this data dump to create our dataset of \{\textit{post, question, answer}\} triples: where the \textit{post} is the initial unedited post, the \textit{question} is the comment containing a question and the \textit{answer} is the edit made to the post that matches the question comment. \\
@@ -204,6 +175,8 @@ StackExchange is a network of online question answering websites about varied to
 \end{table}
 
 A natural question to our process of data creation would be how often is the extracted question a clarification question. We sample a set of 1400 questions from our dataset and design a crowdsourced task where given a question we ask a human to choose whether: a) It is a clarification question, b) It provides an answer or a suggestion; or c) Neither.  63\% of the questions are marked as clarification question, 33\% of them are marked as questions that provides an answer or a suggestion and 4\% of them are marked as neither. The inter-annotator agreement (PAA) is above 90\%. These numbers suggest that although a greater percentage of the extracted questions are clarification questions, our data is imperfect: it includes some non-clarification questions.
+
+
 
 \section{Experimental Results}\label{experiments_results}
 Our primary research questions that we evaluate experimentally are:
