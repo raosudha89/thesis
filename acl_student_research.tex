@@ -83,7 +83,7 @@ In our preliminary work, we introduce a novel dataset, derived from StackExchang
 
 We train our model based on $(p,q,a)$ triples that we extract automatically from StackExchange. Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. Our preliminary results show significant improvements from using the EVPI formalism over both standard feedforward neural network architectures and bag-of-ngrams baselines.
 
-Our preliminary work focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose two new research directions: (1) A template based question generation method where we generate templates like "What version of \_\_\_ are you running?", which is more general than the thousands of specific variants in our data, and then learn how to fill in the blanks based on words in the original post. (2) An encoder-decoder based neural network framework for sequence-to-sequence learning where given a post the encoder encodes the words in the post into a fixed vector representation and the decoder acts as a language model generating the clarification question one word at a time given the context of the post vector. 
+Our preliminary work focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose two new research directions: (1) A template based question generation method where we generate templates like "What version of \_\_\_ are you running?", and then learn how to fill in the blanks based on words in the original post. (2) An encoder-decoder based neural network framework for sequence-to-sequence learning where given a post the encoder encodes the words in the post into a fixed vector representation and the decoder acts as a language model generating the clarification question one word at a time given the context of the post vector. 
 
 \begin{figure*}[t]
 	\centering
@@ -186,9 +186,7 @@ StackExchange is a network of online question answering websites containing time
 \end{enumerate}
 
 \subsection{Experimental setups}\label{task_setup}
-For every post $p$ in our dataset of $(p, q, a)$ triples, we label the question $q$ paired with $p$ as positive. We define our two setups based on how we get our negative question candidates for every $p$:\\
-\textbf{Lucene negative candidates:} We retrieve nine question candidates using Lucene (\S\ref{question_candidate_generator}).\\
-\textbf{Random negative candidates:} We randomly sample nine other questions from our dataset.
+For every post $p$ in our dataset of $(p, q, a)$ triples, we label the question $q$ paired with $p$ as positive. We define our two setups based on how we get our negative question candidates for every $p$. For the \textbf{lucene negative candidates} setup, we retrieve nine question candidates using Lucene (\S\ref{question_candidate_generator}). For the \textbf{random negative candidates} setup, we randomly sample nine other questions from our dataset.
 
 \subsection{Baseline methods}\label{baselines}
 
@@ -210,27 +208,26 @@ In our preliminary work, we focused on building a model that can learn to select
 
 \subsection{Template based question generation}
 
- Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We identify four components to our template based question generation method:
+ Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'',  ``What version of apt-get are you running?'', etc. We propose a following four step approach to our template based clarification question generation method:
 \begin{enumerate}[noitemsep,nolistsep]
-	\item Identifying near similar questions from a huge collection of questions
-	\item Generating templates from near similar questions
-	\item Given a post, selecting the right question template from a set of candidate templates
+	\item Identifying groups of similar questions from a huge collection of questions.
+	\item Generating a template for each group of questions.
+	\item Given a post, selecting the right question template from a set of candidate templates.
 	\item Filling in the blanks in the template using relevant context from the given post.
 \end{enumerate}
 
-For identifying similar questions, we plan to use clustering algorithms which cluster documents based on their similarity. Given a set of questions that are near similar, the next step is to extract a generic template which can be expanded to (almost) each of the variants in the cluster. We use the parts-of-speech information of the words in the question to identify proper nouns (and others) that indicate specific topics. Given these markings, we remove them from the questions to generate a template. Further, we classify questions into probable question types using an idea similar to \cite{}. Given a post, the next step then is to generate a set of candidate question templates and then to select the most relevant question template from the set of candidates. We use our previous model for this step.
+For grouping similar questions together, we will plan to use some of the clustering algorithms which cluster documents based on their lexical and semantic similarity. To generate templates corresponding to each cluster, we plan to identify topic specific words from the question using syntactic information (like parts-of-speech tags) and then remove them to form generic templates.
+In the third step, given a post and a set of candidate question templates, we will select a template using a model similar to our preliminary work. Finally, in the fourth step, we explore methods similar to slot-filling approaches \cite{} to populate the blanks in the template with post specific words.
 
 \subsection{Neural network generative model}
 
+Sequence to sequence models \cite{} have proven to be effective for several language generation tasks like machine translation \cite{}, dialog generation \cite{}, etc. In our second research direction, we plan to build a similar encoder-decoder framework for generating a clarification question one word at a time, given the words of a post. A recent neural generative question answering model \cite{} %https://arxiv.org/pdf/1512.01337.pdf
+  built an answer language model which decides, at each time step, whether to generate a common vocabulary word or a answer word retrieved from a knowledge base. Inspired from this work, we plan to explore a similar question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the given post. This idea will thus try to incorporate the template generation method into a more general neural network framework.
+
 \section{Conclusion}
 
-We have described a new dataset for question generation, and attacked this problem from the perspective of question selection.
-Our model integrates state-of-the-art neural network structure with the classic notion of expected value of perfect information, which effectively models a pragmatic choice on the part of the questioner: how do I \emph{imagine} the other party would answer if I were to ask this question. Such pragmatic priciples have recently been shown to be useful in other tasks as well \cite{golland2010game,smith2013learning,orita2015discourse,andreas2016reasoning}.
+In our preliminary work we described a new dataset for question generation, and attacked this problem from the perspective of question selection. This model integrates state-of-the-art neural network structure with the classic notion of expected value of perfect information, which effectively models a pragmatic choice on the part of the questioner: how do I \emph{imagine} the other party would answer if I were to ask this question. Such pragmatic priciples have recently been shown to be useful in other tasks as well \cite{golland2010game,smith2013learning,orita2015discourse,andreas2016reasoning}.
 
-There are three main avenues for improvement of this work.
-The first is in evaluation: given that this task is so difficult for humans, but also given that there is no single right question to ask, how can we better measure performance at this task?
-This is exactly the same question faced in much research in dialog and generation more broadly \cite{paek2001empirical,lowe2015ubuntu,liu2016not,kannan2017adversarial}.
-Second, to make question generation more general, systems need to be able to generalize, for instance by constructing templates of the from ``What version of \_\_\_ are you running?'' into which the system would need to fill a variable. Finally, asking question is a natural component of dialog, and building a collaborative dialog system that can naturally converse with a user is a broad long term goal.
 
 \bibliography{acl2017}
 \bibliographystyle{acl_natbib}
