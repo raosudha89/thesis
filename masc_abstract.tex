@@ -45,10 +45,8 @@
 
 \title{Are you asking the right questions? \\ Automatically Generating Clarification Questions}
 \author{ 
-  \textbf{Sudha Rao}${}^{1}$\textnormal{,} \textbf{Hal Daum\'e III}${}^{1,3}$\\
-  ${}^1$Computer Science,
-  ${}^2$UMIACS\\
-  University of Maryland\\
+  \textbf{Sudha Rao}${}$\textnormal{,} \textbf{Hal Daum\'e III}${}$\\
+  Computer Science, University of Maryland\\
   raosudha@cs.umd.edu, hal@cs.umd.edu
   }
 
@@ -56,9 +54,8 @@
 
 \begin{document}
 \maketitle
-Inquiry is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. In this work, we explore how can a machine automatically generate clarification questions when faced with uncertainty, a task of increasing importance in today's automated society. 
-A main goal of asking questions is to fill information gaps, typically through clarification questions, which naturally occur in conversations. 
-A good question is one whose \emph{likely answer} is going to be most useful.
+Inquiry is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. We explore how can a machine automatically generate clarification questions when faced with uncertainty, a task of increasing importance in today's automated society. 
+A main goal of asking questions is to fill information gaps, typically through clarification questions. 
 We study the problem of question generation using data from StackExchange, a plentiful online resource in which people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. Consider the exchange in Figure~\ref{askubuntu_post}, in which an initial poster (who we'll call ``Terry'') asks for help configuring environment variables.
 This question is underspecified and a responder (``Parker'') asks a clarifying question ``\textsf{\small What version of Ubuntu do you have?}''
 Our goal in this work is to automate Parker.
@@ -70,7 +67,7 @@ Our work has two main contributions:
 	\item A novel dataset, derived from StackExchange, that enables us to learn a model to ask clarifying questions by looking at the types of questions people ask 
 \end{enumerate}
 
-In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$, there is set $A$ of possible answers. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
+A good question is one whose \emph{likely answer} is going to be most useful. In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$, there is set $A$ of possible answers. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
 \begin{equation}\label{evpi_equation}
 \argmax_{q \in Q} \sum_{a \in A} \mathbb{P}[a | p,q] \U(p+a)
 \end{equation} 
@@ -84,7 +81,7 @@ In order to choose what question to ask, we build a neural network model inspire
 \end{figure}
 
 
-$\mathbb{P}[a | p,q]$ measures the probability of getting an answer $a$ given an initial post $p$ and a clarifying question $q$. $\U(p+a)$ is a utility function that measures how useful it would be if $p$ were augmented with answer $a$. We represent both our probability distribution model $\mathbb{P}$ and our utility function $U$ using neural networks over the appropriate inputs.  We train the parameters of the two models jointly to minimize a joint loss defined such that an answer that has a higher potential of increasing the utility of a post gets a higher probability. We train our model using $(p,q,a)$ triples that we extract automatically using StackExchange's edit history. In the figure, we extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$. Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines.
+$\mathbb{P}[a | p,q]$ measures the probability of getting an answer $a$ given an initial post $p$ and a clarifying question $q$. $\U(p+a)$ is a utility function that measures how useful it would be if $p$ were augmented with answer $a$. We represent both our probability distribution model $\mathbb{P}$ and our utility function $U$ using neural networks over the appropriate inputs.  We train the parameters of the two models jointly to minimize a joint loss defined such that an answer that has a higher potential of increasing the utility of a post gets a higher probability. We train our model using $(p,q,a)$ triples that we extract automatically using StackExchange's edit history. In the figure, we extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$. Our results on three domains of StackExchange (askubuntu, unix and superuser) show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines.
 
 \bibliography{acl2017}
 \bibliographystyle{acl_natbib}
