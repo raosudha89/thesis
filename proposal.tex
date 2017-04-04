@@ -29,22 +29,59 @@
 
 \begin{document}
 
-
 \section{Abstract}
 
-Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
+Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
 
 \section{Introduction}
 
-\subsection{Motivation}
-https://www.skillsyouneed.com/ips/clarification.html
-In communication, clarification involves offering back to the speaker the essential meaning, as understood by the listener, of what they have just said. Thereby checking that the listener's understanding is correct and resolving any areas of confusion or misunderstanding.
+%\subsection{Motivation}
 
-Clarification is important in many situations especially when what is being communicated is difficult in some way.
+Asking questions is fundamental to communication. In our life, we ask questions for several different reasons. Following \newcite{graesser1994question}, \newcite{graesser2008question}  enumerate the purposes of questions as: 
+\textit{Correction of knowledge deficits}: This occurs when there is an obstacle to a goal, a contradiction, an anomalous event, a glitch in an explanation, an obvious gap in knowledge, or a decision required between equally attractive alternatives. The person experiences cognitive disequilibrium so a question is asked to obtain information to restore equilibrium. For e.g., sincere information-seeking questions such as How do I get to that restaurant?\\
+\textit{Monitoring common ground:} Questions are asked to gauge, assess, confirm, or ratify what each other knows about a topic. For e.g. a science teacher asking, Do mammals lay eggs?\\\textit{Social coordination of action:} These include in-direct requests, indirect advice, requests for per-mission, and moves in bargaining. For e.g. Would you hand me that piece of paper?\\\textit{Control of conversation and attention:} These include greetings, directives to change the speaker, rhetorical questions, gripes, and directives to focus on an agent?s actions. For e.g. How are you doing today?
+
+%correction of knowledge deficits (e.g., sincere information-seeking questions such as How do I get to that restaurant?), 
+%the monitoring of common ground (e.g., a science teacher asking, Do mammals lay eggs?), 
+%the social coordination of action (e.g., Would you hand me that piece of paper?),%and the control of conversation and attention (e.g., How are you doing today?). 
+
+In the field of natural language processing, most previous work focuses on generating questions that monitoring common ground. For e.g. generating reading comprehension questions:  given text, write questions that one might find on a standardized test which assess the knowledge that a student possesses about a particular topic.
+
+
+
+The goal of this work is to automatically generate questions that seek to correct knowledge deficits. We do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing. 
+
+In today's age of automation, machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is a natural way for machines to express uncertainty, a task of increasing importance in an automated society. 
+
+The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty. Most prior work on question generation focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. 
+
+%this para -- clarification question for stackexchange --> question selection, question template generation and then fully generative model
+
+%this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
+
+%
+%Asking questions is fundamental to communication. Questions serve different purposes in language. For instance, information retrieval from a knowledge base (``What is the capital of United States''), 
+
+%- clarification question: When passing some information from person A to person B through language, person A has certain understanding of the subject and he/she communicates it across with that context in mind. This context can be very different from person B's understanding of the same subject. Given the possibility of differences between the two understanding, two people are 
+%!TEX encoding = UTF-8 Unicode
+%- motivate why asking question is important
+%- grace hopper's quote: "No computer is ever going to ask a new, reasonable question. It takes trained people to do that."
+%- 
+%
+%https://www.skillsyouneed.com/ips/clarification.html
+%In communication, clarification involves offering back to the speaker the essential meaning, as understood by the listener, of what they have just said. Thereby checking that the listener's understanding is correct and resolving any areas of confusion or misunderstanding.
+%
+%Clarification is important in many situations especially when what is being communicated is difficult in some way.
 
 %Read more at: https://www.skillsyouneed.com/ips/clarification.html
 %-- talk about difference between clarification questions and probing questions
 %-- types of clarification questions: open & closed (http://study.com/academy/lesson/clarifying-questions-definition-examples.html)
+
+%\subsection{Research questions}
+
+
+
+%\subsection{Proposed solutions}
 
 \section{Related Work}
 
@@ -701,5 +738,8 @@ Generate questions after extracting knowledge about the subject from some extern
 \subsection{Timeline}
 
 \section{}
+
+\bibliography{proposal}
+\bibliographystyle{acl2012}
 
 \end{document}

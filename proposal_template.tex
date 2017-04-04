@@ -1,0 +1,269 @@
+\documentclass[11pt]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[letterpaper,bindingoffset=0.2in,%
+            left=1in,right=1in,top=1in,bottom=1in,%
+            footskip=.25in]{geometry}
+\usepackage{microtype}
+%\usepackage[T1]{fontenc}
+%\usepackage{newpxtext,newpxmath}
+\usepackage{mathtools}
+%\usepackage{amsthm}
+\usepackage{latexsym, mathrsfs}
+%\usepackage[amsmath]{ntheorem}
+\usepackage{graphicx}
+\usepackage{subcaption}
+%\usepackage[scaled]{beramono}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage[linesnumbered,ruled,procnumbered]{algorithm2e}
+\usepackage{enumitem}
+\usepackage{multirow}
+%\usepackage{wrapfig}
+\usepackage{xspace}
+\usepackage{textcomp}
+\usepackage{listings}
+% \usepackage{mathdots}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{hhline}
+\usepackage[numbers,sort]{natbib}
+\usepackage[nottoc]{tocbibind}
+\usepackage[normalem]{ulem}
+\usepackage[titletoc]{appendix}
+%\usepackage{subfig}
+%\usepackage{subfloat}
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+  {\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+% VQuel listing
+\newcommand{\mysinglespacing}{%
+  \setstretch{1}% no correction afterwards
+}
+\lstset{basicstyle=\footnotesize\ttfamily\mysinglespacing,breaklines=true,showstringspaces=false,
+numbers=left,numbersep=5pt,
+language=Java,escapeinside={(*@}{@*)}}
+\lstset{emph={
+    range, of, is, retrieve, into, where, all, pk, sort, by, and, or, not, count, count_all,
+    avg, sum, min, max, avg_all, sum_all, min_all, max_all, abs, unique, any, group, as
+    },emphstyle={\bfseries}
+}
+\lstset{deletestring=[b]{"}}
+\lstMakeShortInline[columns=fixed]!
+
+
+\usepackage[pdfpagelabels=false]{hyperref}
+\hypersetup{
+   colorlinks,
+   linkcolor={red!50!black},
+   citecolor={blue!50!black},
+   urlcolor={blue!80!black}
+}
+
+\SetAlFnt{\small}
+
+\mdfdefinestyle{MyFrame}{%
+    linecolor=black,
+    outerlinewidth=1pt,
+    roundcorner=10pt,
+    innertopmargin=\baselineskip,
+    innerbottommargin=\baselineskip,
+    innerrightmargin=20pt,
+    innerleftmargin=20pt,
+    backgroundcolor=gray!50!white}
+    
+\newenvironment{denselist}{
+    \begin{list}{\small{$\bullet$}}%
+    {\setlength{\itemsep}{0ex} \setlength{\topsep}{0ex}
+    \setlength{\parsep}{0pt} \setlength{\itemindent}{0pt}
+    \setlength{\leftmargin}{1.5em}
+    \setlength{\partopsep}{0pt}}}%
+    {\end{list}}
+
+\usepackage{cleveref}
+\crefname{section}{\S\!\!\!\;}{\S\S}
+\Crefname{section}{\S}{\S\S}
+\crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
+
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proof}{Proof}
+\newtheorem{query}{Query}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+\newtheorem{formulation}{Problem}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+
+\newcommand{\topic}[1]{\vspace{-3.5pt}\smallskip \smallskip \noindent{\bf #1:}}
+\newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
+\renewcommand{\stitle}[1]{\vspace{1em}\noindent\textbf{#1}}
+
+\newcommand{\vv}{\mathcal{V}\xspace}
+\newcommand{\gcal}{\mathcal{G}\xspace}
+\newcommand{\ee}{\mathcal{E}\xspace}
+\newcommand{\cc}{\mathcal{C}\xspace}
+\newcommand{\rr}{\mathcal{R}\xspace}
+\newcommand{\hh}{\mathcal{H}\xspace}
+\newcommand{\pp}{\mathcal{P}\xspace}
+\newcommand{\mm}{\mathcal{M}\xspace}
+
+\newcommand{\kk}{\mathcal{K}\xspace}    % Universe of keys
+\newcommand{\sg}{\mathcal{G}\xspace}    % Storage graph
+\newcommand{\qt}{\mathcal{G}_Q\xspace}  % Access tree
+\newcommand{\qq}{\mathcal{Q}\xspace}    % Query
+\newcommand{\qa}{\mathcal{A}\xspace}    % Multi-object subset
+\newcommand{\ck}{\textsc{Checkout}\xspace}
+
+\newcommand{\D}[1]{\Delta_{#1}}
+\newcommand{\Dp}[1]{\Delta_{#1}^{+}}
+\newcommand{\Dm}[1]{\Delta_{#1}^{-}}
+
+\newcommand{\dsvc}{\textsc{DEX}\xspace}
+\newcommand{\dhub}{\textsc{DataHub}\xspace}
+%\newcommand{\df}{\texttt{datafile}\xspace}
+%\newcommand{\dfs}{\texttt{datafile}s\xspace}
+
+\newcommand{\ds}{{\sc RStore}\xspace}
+\newcommand{\bt}{{\sc Bottom-Up}\xspace}
+\newcommand{\sh}{{\sc Shingle}\xspace}
+\newcommand{\dfs}{{\sc DepthFirst}\xspace} 
+\newcommand{\bfs}{{\sc BreadthFirst}\xspace}
+\newcommand{\deltat}{{\sc Delta}\xspace}
+\newcommand{\subc}{{\sc SubChunk}\xspace}
+
+
+
+%COMPRESS
+\newcommand{\squeezeup}{\vspace{-2.5mm}}
+
+% Debugging
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\amol}[1]{\textcolor{red}{[Amol: #1]}}
+\newcommand{\resolved}[1]{\textcolor{green}{[Amol: #1]}}
+
+\newcommand{\eat}[1]{}
+\newcommand{\todo}[1]{\textcolor{blue}{[TODO: #1]}}
+
+
+\title{
+{\bf Thesis Proposal Title}\\
+\vspace{18pt}
+\it Preliminary Oral Exam (Thesis Proposal)}
+
+\author{
+{\bf Sudha Rao}  \\
+Department of Computer Science \\
+University of Maryland, College Park\\
+{\texttt{raosudha@cs.umd.edu}}
+}
+
+
+\date{
+\vspace{42pt}
+Dissertation proposal submitted to: \\
+Department of Computer Science \\
+University of Maryland, College Park, MD 20742 \\
+\bigskip
+\bigskip
+\today
+\bigskip
+\bigskip
+\begin{table}[htp]
+\begin{center}
+\begin{tabular}{lll}
+&\multicolumn{2}{l}{Advisory Committee:} \\ \\
+Dr. Dana Nau & Chair/Advisor & U. of Maryland, College Park \\
+Dr. Tom Goldstein & Advisor & U. of Maryland, College Park \\
+Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park \\
+Dr. Michele Gelfand &  & U. of Maryland, College Park
+\end{tabular}
+\end{center}
+\end{table}%
+}
+
+
+\begin{document}
+
+\pagestyle{plain}
+\pagenumbering{roman}
+
+\maketitle
+\pagebreak
+
+\begin{abstract}
+\normalsize
+
+Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
+
+\end{abstract}
+
+\pagebreak
+
+
+\tableofcontents
+\pagebreak
+
+\cleardoublepage
+\pagenumbering{arabic}
+
+
+\chapter{Introduction}
+
+Asking questions is fundamental to communication. We ask questions for several different reasons. Following \cite{graesser1994question}, \cite{graesser2008question}  enumerate the purposes of questions as: \\
+\textit{Correction of knowledge deficits} which occurs when there is an obstacle to a goal, a contradiction, or an obvious gap in knowledge. The person experiences cognitive disequilibrium so a question is asked to obtain information to restore equilibrium. For e.g., sincere information-seeking questions such as ``How do I get to that restaurant?''\\
+\textit{Monitoring common ground} where questions are asked to assess or confirm what a person knows about a topic. For e.g. a science teacher asking, ``Do mammals lay eggs?''\\\textit{Social coordination of action} that include indirect requests, indirect advice and requests for permission. For e.g. ``Would you hand me that piece of paper?''\\\textit{Control of conversation and attention} including greetings, directives to change the speaker, rhetorical questions, gripes, and directives to focus on an agent's actions. For e.g. ``How are you doing today?''\\
+
+%correction of knowledge deficits (e.g., sincere information-seeking questions such as How do I get to that restaurant?), 
+%the monitoring of common ground (e.g., a science teacher asking, Do mammals lay eggs?), 
+%the social coordination of action (e.g., Would you hand me that piece of paper?),%and the control of conversation and attention (e.g., How are you doing today?). 
+
+\noindent
+The field of natural language processing aims to develop techniques that would help machines process naturally spoken language as well as humans do. However, as  humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. This extent of being informative depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing. In today's age of automation, for machines to be able to effectively collaborate with humans it is important that they learn how to express uncertainty by asking questions.\\
+
+\noindent
+In the field of natural language processing, most previous work focuses on generating questions for monitoring common ground. For e.g. generating reading comprehension questions that one might find on a standardized test assessing the knowledge that a student possesses about a particular topic.\\
+
+%\noindent
+%The goal of this work is to automatically generate questions that seek to correct knowledge deficits. We do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing. 
+
+%    The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty. Most prior work on question generation focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. 
+
+%this para -- clarification question for stackexchange --> question selection, question template generation and then fully generative model
+
+%this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
+
+\newpage
+
+\chapter{First Paper}
+
+
+
+\newpage
+
+\chapter{Second Paper}
+
+
+
+\newpage
+
+\chapter{Proposed Work}
+
+
+
+\newpage
+
+\begin{small}
+\bibliographystyle{acl2017}
+\bibliography{proposal}
+\end{small}
+
+\end{document}
+
+
