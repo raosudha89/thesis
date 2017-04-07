@@ -179,10 +179,9 @@ University of Maryland, College Park, MD 20742 \\
 \begin{center}
 \begin{tabular}{lll}
 &\multicolumn{2}{l}{Advisory Committee:} \\ \\
-Dr. Dana Nau & Chair/Advisor & U. of Maryland, College Park \\
-Dr. Tom Goldstein & Advisor & U. of Maryland, College Park \\
-Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park \\
-Dr. Michele Gelfand &  & U. of Maryland, College Park
+Dr. Hal Daume III & Chair/Advisor & U. of Maryland, College Park \\
+Dr. Philip Resnik & Advisor & U. of Maryland, College Park \\
+Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park 
 \end{tabular}
 \end{center}
 \end{table}%
@@ -216,46 +215,86 @@ Asking questions is fundamental to communication, and machines cannot effectivel
 
 \chapter{Introduction}
 
-Asking questions is fundamental to communication. We ask questions for several different reasons. Following \cite{graesser1994question}, \cite{graesser2008question}  enumerate the purposes of questions as: \\
-\textit{Correction of knowledge deficits} which occurs when there is an obstacle to a goal, a contradiction, or an obvious gap in knowledge. The person experiences cognitive disequilibrium so a question is asked to obtain information to restore equilibrium. For e.g., sincere information-seeking questions such as ``How do I get to that restaurant?''\\
-\textit{Monitoring common ground} where questions are asked to assess or confirm what a person knows about a topic. For e.g. a science teacher asking, ``Do mammals lay eggs?''\\\textit{Social coordination of action} that include indirect requests, indirect advice and requests for permission. For e.g. ``Would you hand me that piece of paper?''\\\textit{Control of conversation and attention} including greetings, directives to change the speaker, rhetorical questions, gripes, and directives to focus on an agent's actions. For e.g. ``How are you doing today?''\\
-
-%correction of knowledge deficits (e.g., sincere information-seeking questions such as How do I get to that restaurant?), 
-%the monitoring of common ground (e.g., a science teacher asking, Do mammals lay eggs?), 
-%the social coordination of action (e.g., Would you hand me that piece of paper?),%and the control of conversation and attention (e.g., How are you doing today?). 
+\section{Motivation}
+An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. The extent of informativeness depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing and thus attain a mutual understanding with the speaker. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.\\
 
 \noindent
-The field of natural language processing aims to develop techniques that would help machines process naturally spoken language as well as humans do. However, as  humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. This extent of being informative depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing. In today's age of automation, for machines to be able to effectively collaborate with humans it is important that they learn how to express uncertainty by asking questions.\\
+In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. For a machine to effectively collaborate with humans, it is important that it learns to ask a question when faced with uncertainty, a task of increasing importance in an automated society. For example, consider a scenario where an automated agent is trying to assist you in solving a problem. You will describe your problem to the agent. The agent on the other end has a certain understanding of what information is required to solve that problem. The agent can either make an assumption and work under uncertainty OR ask a question. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with such uncertainty or knowledge gaps
+
+\section{Research questions}
+
+About a decade ago, if you faced a technical problem the only way to solve it would be to go to an expert. Due to the recent surge in the use of internet, a lot of such problem solving happens online these days on question answering (Q\&A) forums where users post their problems and other users reply to them providing assistance. However \cite{asaduzzaman2013answering} observed that on StackExchange, one such community-driven problem solving platforms, many a times the posts go unanswered for a long time because they are not clear enough i.e. they are missing some information. Other users then ask clarification questions to those posts so that they can better offer assistance to the original poster. Our first research question is the following: \textit{Can we build a model that can learn to automatically generate a clarification question to a post by looking at clarification questions posted in the forum before?}\\
 
 \noindent
-In the field of natural language processing, most previous work focuses on generating questions for monitoring common ground. For e.g. generating reading comprehension questions that one might find on a standardized test assessing the knowledge that a student possesses about a particular topic.\\
+Human-bot interaction has become increasingly popular in recent times. Apple's siri, Amazon's alexa, IBM's watson are all examples of successful advancements in the Artificial Intelligence technology. These technologies are great when it comes to simple natural language based interactions like ``What is the weather like in New York City?'' OR ``Play me latest top 10 songs'', etc. However when one tries to use these interfaces for more complicated purposes like ``I can't start my laptop. Help me\!'', OR ``Find me a recipe for lasagne'', within a few interactions one would soon give up. One key reasons for such failures is the lack of common understanding between the human user and the bot. The human user has a certain understanding of the problem/request he has and many a times he fails to convey the same understanding to the bot. In such a scenario, the bot can be much more useful if it could try to establish this common understanding by asking relevant questions. Our second research question is: \textit{Can we build an interactive model that can learn to ask clarification questions when faced with uncertainty or a knowledge gap?}\\
 
-%\noindent
-%The goal of this work is to automatically generate questions that seek to correct knowledge deficits. We do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing. 
+\noindent
+% clarification question with the help of knowledge base i.e. find out what is missing and then ask a question
 
-%    The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty. Most prior work on question generation focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. 
+\section{Proposed solutions}
 
-%this para -- clarification question for stackexchange --> question selection, question template generation and then fully generative model
+In order to learn how to ask clarification questions, we build a model inspired by the decision theoretic framework of expected value of perfect information (EVPI). EVPI is a measurement of of the value of gathering information. A good question is the one whose likely answer is going to be the most useful. In our setting, we use EVPI to calculate which question is most likely to elicit an answer that would make the post more informative. On StackExchange, users routinely ask clarification questions to post. The author of the post subsequently edits the post answering the question. We mine many (post, question, answer) triples using StackExchange's edit histories. We extract the initial post as p, question posted in the comments section as q, and edit to the original post as answer a to form our (p,q,a) triples. Using this data, we build our EVPI inspired neural network model which learns to ask a clarification question given a post.\\
+
+\noindent
+In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions. Given a post, we first generate a set of candidate questions by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene \footnote{https://lucene.apache.org/}, a software extensively used in information retrieval for extracting documents relevant to a given query from a pool of documents. To enable our system to generalize better on new unseen cases, we propose two research directions: a template based question generation method where we first generate templates and then fill in the variables using the current context of the post; and a sequence-to-sequence based neural generative model where we generate the question one word at a time given a post.\\
+
+\noindent
+We study the problem of generation clarification questions in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \cite{} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. %Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. Our model, on the other hand, that captures a similar notion using what we call the `bursty vocabulary' i.e. we up-weight the words that occur frequently within the short context of a conversation, thus avoiding the need for manually crafting the list of coarse tokens. 
+We build a novel neural network based model using what we call the `bursty vocabulary' i.e. up-weighting the words that occur frequently within the short context of a conversation, thus indirectly giving more importance to topic words. This approach gives us significant improvements over current neural network baselines. In our next step, we propose to look at the responses in the conversations that are questions and build a model that learns to generate a question based response given different levels of context of a conversation.
 
 %this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
 
 \newpage
 
-\chapter{First Paper}
+\chapter{Related work}
 
+\section{Question Generation}
+
+The problem of question generation has received sparse attention from the natural language processing community. Most prior work focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test \cite{vanderwende2008importance,heilman2011automatic,rus2011question,olney2012question}.  Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not.  
+
+Outside reading comprehension questions, \cite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \cite{liu2010automatic} use template question generation to help authors write better related work sections. \cite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
+\cite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \cite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
+
+- Question generation shared task: http://www.aclweb.org/anthology/W11-2853
+
+\section{Neural networks in NLP}
+
+\section{Dialogue modeling}
+
+Following the introduction of the Ubuntu dialogue dataset, there has been several recent work in modeling dialogue that uses this dataset. \cite{DBLP:conf/sigdial/LowePSP15} describe two neural network baseline models using Recurrent Neural Network (RNN) and Long Short Term Memory (LSTM). 
+\cite{DBLP:journals/corr/KadlecSK15} create an ensemble of LSTMs, Bi-LSTMs and CNNs to get improved baselines. 
+\cite{xu2016incorporating} incorporate domain knowledge by enhancing their LSTM model with a recall gate.
+\cite{serban2016hierarchical} introduce a latent variable hierarchical recurrent encoder-decoder model by adding a context level RNN that processes sequences of sub-sequences operating on top of the token level RNN.
+\cite{serban2016multiresolution} take a similar hierarchical approach but instead of defining a latent coarse representation, they assume it to be observed and experiment with two such representations (sequence of nouns and sequence of activities and entities).
+\cite{baudivs2016sentence} introduce a unified approach for scoring sentence pairs applicable to number of tasks including next utterance classification and show best result on the Ubuntu dialogue corpus task. 
+
+The techniques we combine in this work are best practices gleaned from the NLP modeling literature. 
+The character trigram histogram technique (Section~\ref{character_level_modeling}) was introduced as word hashing \cite{DBLP:conf/cikm/HuangHGDAH13} to reduce the dimensionality of bag-of-words term vectors. Residual learning (Section~\ref{residual_learning}) was first introduced as a way to ease training of very deep networks in image recognition work \cite{he2015deep}. The technique of attention aggregation (Section~\ref{attention_aggregation} has been effectively used for several language based tasks like neural machine translation \cite{DBLP:journals/corr/BahdanauCB14}, \cite{DBLP:conf/emnlp/LuongPM15}, question answering \cite{} and others. More specifically in dialogue modeling, \cite{DBLP:journals/corr/YaoPZW16} have shown that attending to the context while generating the words of the response, similar to attention based model used for MT, gives an improvement over using just the last hidden state.
 
 
 \newpage
 
-\chapter{Second Paper}
+\chapter{Generating clarification questions on StackExchange posts}
 
+\newpage
 
+\chapter{Generating next response during two-way conversation}
 
 \newpage
 
 \chapter{Proposed Work}
 
+\section{Template based question generation}
 
+Our preliminary work focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose a template based question generation method. Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of linux are you running?'',  ``What version of apt-get are you running?'', etc. We propose a following four-step approach:  (1) Cluster questions based on their similarity; (2) Generate a template for each cluster of questions; (3) Given a post, select a question template from a set of candidate templates; and finally (4) Fill in the blanks in the template using words relevant to the given post.
+
+\section{Sequence-to-sequence based question generation}
+
+Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation (Sutskever et.al. 2014), dialog generation (Serban, Iulian V., et al. 2016), etc. On similar lines, we propose a model for generating a clarification question one word at a time, given the words of a post. A recent neural generative question answering model (Yin, Jun, et al.  2016) built an answer language model which decides, at each time step, whether to generate a common vocabulary word or a answer word retrieved from a knowledge base. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a post specific word, thus incorporating the template based question generation method into a more general neural network framework.
+
+\section{Clarification questions for dialog systems}
+
+In our preliminary work we developed a model for generating a clarification question in a non-interactive setting i.e. after someone has described their problem in its entirety, we ask a question. However, most of such problem solving happens in the form of a dialog between a system and a human. In our next research direction, we propose to build a model that learns to generate  clarification questions at different stages of an ongoing conversation. Our model will learn the trade-off between asking a generic question at the initial stages and asking a specific question at the later stages of a conversation. We will evaluate our model using the Ubuntu Dialogue corpus, a large corpus recently put together by Lowe, Ryan, et al. (2015) by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system.
 
 \newpage
 

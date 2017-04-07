@@ -37,13 +37,16 @@ Asking questions is fundamental to communication, and machines cannot effectivel
 
 %\subsection{Motivation}
 
-Asking questions is fundamental to communication. In our life, we ask questions for several different reasons. Following \newcite{graesser1994question}, \newcite{graesser2008question}  enumerate the purposes of questions as: 
+Asking questions is fundamental to communication. In our life, we ask questions for several different reasons. Following \cite{graesser1994question}, \cite{graesser2008question}  enumerate the purposes of questions as: 
 \textit{Correction of knowledge deficits}: This occurs when there is an obstacle to a goal, a contradiction, an anomalous event, a glitch in an explanation, an obvious gap in knowledge, or a decision required between equally attractive alternatives. The person experiences cognitive disequilibrium so a question is asked to obtain information to restore equilibrium. For e.g., sincere information-seeking questions such as How do I get to that restaurant?\\
-\textit{Monitoring common ground:} Questions are asked to gauge, assess, confirm, or ratify what each other knows about a topic. For e.g. a science teacher asking, Do mammals lay eggs?\\\textit{Social coordination of action:} These include in-direct requests, indirect advice, requests for per-mission, and moves in bargaining. For e.g. Would you hand me that piece of paper?\\\textit{Control of conversation and attention:} These include greetings, directives to change the speaker, rhetorical questions, gripes, and directives to focus on an agent?s actions. For e.g. How are you doing today?
+\textit{Monitoring common ground:} Questions are asked to gauge, assess, confirm, or ratify what each other knows about a topic. For e.g. a science teacher asking, Do mammals lay eggs?\\
+\textit{Social coordination of action:} These include in-direct requests, indirect advice, requests for per-mission, and moves in bargaining. For e.g. Would you hand me that piece of paper?\\
+\textit{Control of conversation and attention:} These include greetings, directives to change the speaker, rhetorical questions, gripes, and directives to focus on an agent?s actions. For e.g. How are you doing today?
 
 %correction of knowledge deficits (e.g., sincere information-seeking questions such as How do I get to that restaurant?), 
 %the monitoring of common ground (e.g., a science teacher asking, Do mammals lay eggs?), 
-%the social coordination of action (e.g., Would you hand me that piece of paper?),%and the control of conversation and attention (e.g., How are you doing today?). 
+%the social coordination of action (e.g., Would you hand me that piece of paper?),
+%and the control of conversation and attention (e.g., How are you doing today?). 
 
 In the field of natural language processing, most previous work focuses on generating questions that monitoring common ground. For e.g. generating reading comprehension questions:  given text, write questions that one might find on a standardized test which assess the knowledge that a student possesses about a particular topic.
 
@@ -57,7 +60,7 @@ The goal of this thesis work is to explore how can a machine automatically gener
 
 %this para -- clarification question for stackexchange --> question selection, question template generation and then fully generative model
 
-%this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
+%this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in multi-turn dialogue -- generative models on ubuntu dialogue dataset
 
 %
 %Asking questions is fundamental to communication. Questions serve different purposes in language. For instance, information retrieval from a knowledge base (``What is the capital of United States''), 
@@ -664,7 +667,7 @@ Given a post, the next step then is to generate a set of candidate question temp
 --  prior work section contains a lot of work related to us -- 
 \item Clarification questions by a robot during human-robot dialogue - % http://cs.brown.edu/~stefie10/publications/deits13.pdf 
 \item Idea: We extend our work on stackexchange by modeling multi-turn clarification questions in dialogues? Where we try to resolve some uncertainty by asking questions in multiple rounds. 
-\item Concerns: dataset? Evaluation? Maybe we can extract questions from ubuntu dialogue corpus (or other corpus from IMDB like sitcoms (friends, big bang theory), OR twitter dialogues (recent msr paper on dialogue uses such datasets)
+\item Concerns: dataset? Evaluation? Maybe we can extract questions from ubuntu dialogue corpus (or other corpus from IMDB like sitcoms (friends, big bang theory), OR twitter dialogues (recent msr paper on dialogue uses such datasets) % https://arxiv.org/pdf/1603.06155.pdf
 \end{enumerate}
 
 \subsection{Information augmentation}
