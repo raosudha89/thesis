@@ -50,9 +50,7 @@
 \begin{abstract}
 	
 Inquiry is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty, a goal of increasing importance in today's automated society. We do a preliminary study using data from StackExchange, a plentiful online resource where people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. We build neural network models inspired by the idea of the expected value of perfect information: a good question is one whose expected answer is going to be most useful.
-%We build neural network models that learn to select an exact question to ask from a candidate set of prior questions. %Our model is inspired by the idea of expected value of perfect information: a good question is one whose expected answer is going to be most useful. 
-%To build generalizable systems, we propose two research directions; a template based question generation model and a generative sequence-to-sequence neural network based question generation model.
-To build generalizable systems, we propose two research directions; a template based model and a sequence-to-sequence based neural generative model for question generation.
+To build generalizable systems, we propose two research directions: a template based model and a sequence-to-sequence based neural generative model.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -100,28 +98,24 @@ Given these two models, at prediction time we search over a shortlist of possibl
 We are able to train these models jointly based on $(p,q,a)$ triples that we extract automatically from StackExchange.
 Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. 
 
-Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines, even when our system builds on strong information retrieval scaffolding. In comparison, without this scaffolding, the bag-of-ngrams model outperforms the feedforward network. %We additionally analyze the difficulty of this task for non-expert humans, and give examples of system output. 
-
-%In our preliminary work, we introduce a novel dataset, derived from StackExchange, that enables us to learn a model to ask clarifying questions by looking at the types of questions people ask (\S\ref{dataset_creation}).\footnote{We use data from StackExchange; per license cc-by-sa 3.0, the data is ``intended to be shared and remixed'' (with attribution). We will release all of the data we extract.}. We build a novel neural-network model (\S\ref{model}) inspired from the decision theoretic framework of the Expected Value of Perfect Information (EVPI), a measure of the value of gathering additional information. In our setting, we use EVPI to calculate which question, given a set of candidate questions, is most likely to elicit an answer that would make the post more informative. Formally, for an input post $p$, we want to choose a question $q$ that maximizes $\mathbb{E}_{a \sim p,q}[\U(p+a)]$, where $a$ is a hypothetical answer and $U$ is a function measuring the \emph{utility} of post $p$ if $a$ were to be added to it.
-%
-%We train our model based on $(p,q,a)$ triples that we extract automatically from StackExchange. Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. Our preliminary results show significant improvements from using the EVPI formalism over both standard feedforward neural network architectures and bag-of-ngrams baselines.
-
-%In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose two new research directions: (1) A template based question generation method where we generate templates like "What version of \_\_\_ are you running?", and then learn how to fill in the blanks based on words in the original post. (2) An encoder-decoder based neural network framework for sequence-to-sequence learning where given a post the encoder encodes the words in the post into a fixed vector representation and the decoder acts as a language model generating the clarification question one word at a time given the context of the post vector. 
+Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines, even when our system builds on strong information retrieval scaffolding. In comparison, without this scaffolding, the bag-of-ngrams model outperforms the feedforward network. We additionally analyze the difficulty of this task for non-expert humans. 
 
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=0.85\textwidth]{model}
-	\caption{ The behavior of our model during test time. Given a post $p$, Lucene retrieves 9 posts similar to post $p$. We consider the questions asked to those 9 posts, plus the original, as question candidates and the edits made to the posts in response to the questions as answer candidates. Our answer model generates an answer representation $F(p,q_j)$ for each question candidate $q_j$ and calculates how close is an answer candidate $a_k$ to $F(p,q_j)$. Our utility calculator calculates the utility of the post if it were updated with the answer $a_k$. Finally we return the question $q_j$ that maximizes the expected utility of the post $p$ (Equation~\ref{evpi_equation}).}
+	\caption{ The behavior of our model during test time. Given a post $p$, we retrieve 10 posts similar to $p$ using Lucene and consider the questions asked to those as question candidates and the edits made to the posts in response to the questions as answer candidates. Our answer model generates an answer representation $F(p,q_j)$ for each question candidate $q_j$ and calculates how close is an answer candidate $a_k$ to $F(p,q_j)$. Our utility calculator calculates the utility of the post if it were updated with the answer $a_k$. We select the question $q_j$ that maximizes the expected utility of the post $p$ (Equation~\ref{evpi_equation}).}
 	\label{model}
-	%\vspace{-1.0em}
+	\vspace{-0.5em}
 \end{figure*}
 
 \section{Related Work} \label{related_work}
 
 The problem of question generation has received sparse attention from the natural language processing community. Most prior work focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test \cite{vanderwende2008importance,heilman2011automatic,rus2011question,olney2012question}.  Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not.  
 
-Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
-\newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
+%Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
+%\newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
+
+Outside reading comprehension questions, \newcite{labutov2015deep} studied the problem of generating question templates via crowdsourcing, \newcite{liu2010automatic} use template based question generation to help authors write better related work sections, \newcite{mostafazadeh2016generating} consider question generation from images, and  \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser.
 
 \section{Model Description}\label{model}
 
@@ -147,13 +141,10 @@ where $\lambda$ is a tunable parameter that controls the variance of the distrib
 
 We train our answer generator using the following intuition: a question can be asked in several different ways. For e.g. in Figure~\ref{askubuntu_post}, the question ``\textsf{\small What version of Ubuntu do you have?}'' can be asked in other ways like ``\textsf{\small What version of operating system are you using?}'', ``\textsf{\small Version of OS?}", etc.  
 Additionally, a question can generate several different answers. For instance, ``\textsf{\small Ubuntu 14.04 LTS}", ``\textsf{\small Ubuntu 12.0}", ``\textsf{\small Ubuntu 9.0}", are all valid answers. To capture these generalizations, we define the following loss function:
-%
-%We use our dataset of \{\textit{post, question, answer}\} triples. Given a $\{p_i, q_i, a_i\}$ triple, we use a long short-term memory architecture (LSTM) \cite{hochreiter1997long} to get to their respective neural hidden representations $\{\bar p_i, \bar q_i, \bar a_i\}$.  Given $(\bar p_i, \bar q_i)$, we define a feed-forward neural network $F$ that combines the post and question representations to get an answer representation $F(\bar p_i, \bar q_i)$. We train our answer generator to minimize the loss function below:
-%
 \begin{align}\label{eq_answer_generator}
 \textrm{loss}_{\textrm{ans}}(\bar p, \bar q, \bar a, Q) 
 &=  {|| F(\bar p, \bar q) - \bar a||}^2 & \\
-&\hspace{-25mm} +  \sum_{j \in Q} \Big ( {|| F(\bar p, \bar q) - \bar{a_j} ||}^2  (1 - \tanh{(|| \bar q - \bar{q_j} ||^2)}) \Big ) \Big \} &\nonumber
+&\hspace{-25mm} +  \sum_{j \in Q} \Big ( {|| F(\bar p, \bar q) - \bar{a_j} ||}^2  (1 - \tanh{(|| \bar q - \bar{q_j} ||^2)}) \Big ) &\nonumber
 \end{align}
 %
  In equation~\ref{eq_answer_generator}, the first term forces the answer representation $F(\bar p_i, \bar q_i)$ to be as close as possible to the correct answer $a_i$ and the second term forces it to be close to the answer $a_j$ corresponding to a question $q_j$ very similar to $q_i$ (i.e. $||\bar{q_i} - \bar{q_j}||$ is near zero).
@@ -172,14 +163,15 @@ Additionally, a question can generate several different answers. For instance, `
 		EVPI & \bf 23.3 & \bf 43.4 & \bf 51.0 & \bf 70.3 & \bf 61.1 & \bf 75.5 & \bf 87.9  & \bf 95.8  \\
 		\bottomrule
 	\end{tabular}
-	\label{table:results_topN}
 	\caption{Results of two setups `Lucene negative candidates' and `Random negative candidates' on askubuntu when trained on a combination of three domains: askubuntu, unix and superuser.  We report four metrics: accuracy (percent of time the top ranked question was correct),
 		mean reciprocal rank (the reciprocal of the ranked position of the correct question in the top 10 list), recall at 3 (percent of time the correct answer is in the top three) and
 		recall at 5.}
+	\label{tab:results_topN}
+	\vspace{-1.0em}
 \end{table*}
 
 \subsection{Utility Calculator}\label{utility_calculator}
-Given a post $p$ and an answer candidate $a_k$, our third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ which measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We use the intuition that a post $p_i$ in our dataset of $(p_i, q_i, a_i)$ triples, when updated with the answer $a_i$ it is paired with would be more complete than if it is updated with some other answer $a_j$. Therefore we label all the $(p_i, a_i)$ pairs from our dataset as positive and label $p_i$ paired with other nine answer candidates generated using Lucene (\S\ref{question_candidate_generator}) as negative.  The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$ where $F$ is a feedforward neural network. We want this utility to be close to one for all the positively labelled $(p,a)$ pairs and close to zero for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
+Given a post $p$ and an answer candidate $a_k$, our third step is to calculate the utility of the updated post i.e. $\U(p + a_k)$ which measures how useful it would be if a given post $p$ were augmented with an answer $a_k$. We use the intuition that a post $p_i$, when updated with the answer $a_i$ that it is paired with in our dataset, would be more complete than if it is updated with some other answer $a_j$. Therefore we label all the $(p_i, a_i)$ pairs from our dataset as positive and label $p_i$ paired with other nine answer candidates generated using Lucene (\S\ref{question_candidate_generator}) as negative.  The utility of the updated post is then defined as $\U(p+a) = \sigma ( F(\bar{p}, \bar{a}) )$ where $F$ is a feedforward neural network. We want this utility to be close to one for all the positively labelled $(p,a)$ pairs and close to zero for all the negatively labelled $(p, a)$ pairs. We therefore define our loss using the binary cross-entropy formulation below:
 \begin{align}\label{eq_utility_calculator}
 \textrm{loss}_{\textrm{util}}(y, \bar p, \bar a) &= y \log(\sigma (F(\bar{p}, \bar{a})))
 \end{align}
@@ -199,16 +191,21 @@ Given such an estimate $\mathbb{P}[a|p,q]$ of an answer and a utility $\U(p+a)$ 
 \subsection{Dataset}\label{dataset_creation}
 StackExchange is a network of online question answering websites containing timestamped information about the posts, comments on the post and the history of the revisions made to the post. Using this, we create our dataset of \{\textit{post, question, answer}\} triples: where \textit{post} is the initial unedited post, \textit{question} is the comment containing a question and \textit{answer} is the edit made to the post that matches the question comment. We extract a total of 37K triples from the following three domains of StackExchange: askubuntu, unix and superuser.
 
-\subsection{Experimental setups}\label{task_setup}
-We define our task as given a post and 10 question candidates, select the correct question candidate. For every post $p$ in our dataset of $(p, q, a)$ triples, the question $q$ paired with $p$ is our positive question candidate. We define two approaches to generate negative question candidates: \textbf{Lucene Negative Candidates} where we retrieve nine question candidates using Lucene (\S\ref{question_candidate_generator}) and \textbf{Random Negative Candidates} where we randomly sample nine other questions from our dataset.
+\subsection{Experimental Setups}\label{task_setup}
+We define our task as given a post and 10 question candidates, select the correct question candidate. For every post $p$ in our dataset of $(p, q, a)$ triples, the question $q$ paired with $p$ is our positive question candidate. We define two approaches to generate negative question candidates: \\
+\textbf{Lucene Negative Candidates}: We retrieve nine question candidates using Lucene (\S\ref{question_candidate_generator}) and \\
+\textbf{Random Negative Candidates}: We randomly sample nine other questions from our dataset.
 
-\subsection{Preliminary research questions}\label{experiments_results}
-Our primary research questions that we evaluate experimentally are:
-\begin{enumerate}[noitemsep,nolistsep]
-	\item Does a neural architecture improve upon a simple bag-of-ngrams baseline?
-	\item Does the EVPI formalism provide leverage over a similarly expressive feed-forward network?
-	\item How much harder is the task when the negative candidate questions come from Lucene rather than selected randomly?
-\end{enumerate}
+\subsection{Primary Research Questions}\label{experiments_results}
+Our primary research questions that we evaluate experimentally are:\\
+a. Does a neural architecture improve upon a simple bag-of-ngrams baseline?\\
+b. Does the EVPI formalism provide leverage over a similarly expressive feed-forward network?\\\
+c. How much harder is the task when the negative candidate questions come from Lucene rather than selected randomly?
+%\begin{enumerate}[noitemsep,nolistsep]
+%	\item Does a neural architecture improve upon a simple bag-of-ngrams baseline?
+%	\item Does the EVPI formalism provide leverage over a similarly expressive feed-forward network?
+%	\item How much harder is the task when the negative candidate questions come from Lucene rather than selected randomly?
+%\end{enumerate}
 
 \subsection{Baseline Methods}\label{baselines}
 
@@ -218,32 +215,47 @@ Our primary research questions that we evaluate experimentally are:
 
 \subsection{Results}
 
-We describe results on a test split of askubuntu when our models are trained on the union of all data, summarized in Table~\ref{table:results_topN}. The left half of this table shows results when the candidate sets is from Lucene---the ``hard'' setting and the right half of this table shows the same results when the candidate set is chosen randomly---the ``easy'' setting. Here, we see that for all the evaluation metrics, EVPI outperforms all the baselines by at least a few percentage points. A final performance of 51\% recall at 3 in the ``hard'' setting is encouraging, though clearly there is a long way to go for a perfect system. 
+We describe results on a test split of askubuntu when our models are trained on the union of all data, summarized in Table~\ref{tab:results_topN}. The left half of this table shows results when the candidate sets is from Lucene---the ``hard'' setting and the right half of this table shows the same results when the candidate set is chosen randomly---the ``easy'' setting. Here, we see that for all the evaluation metrics, EVPI outperforms all the baselines by at least a few percentage points. A final performance of 51\% recall at 3 in the ``hard'' setting is encouraging, though clearly there is a long way to go for a perfect system. 
+
+\section{How good are humans at this task?}
+
+In this section we address two natural questions:
+(a) How does the performance of our system compare to a human solving the same task?
+(b) Just because the system selects a question that is not the exact gold standard question, is it certainly wrong?
+To answer these questions, we had 14 computer science graduate students perform the task on $50$ examples.
+Most of these graduate students are \emph{not} experts in unix or ubuntu, but are knowledgable.
+Given a post and a randomized list of ten possible questions, they were instructed to select what they thought was the \emph{single} best question to ask, and additionally mark as ``valid'' any additional questions that they thought would also be okay to ask.
+We also asked them to rate their confidence in $\{0,1,2,3\}$.
+Most found this task quite challenging because many of the questions are about subtle nuances of operating system behavior.
+
+These annotator's accuracy on the ``hard'' task of Lucene-selected questions, was only 36\%, significantly better than our best system (23\%), but still far from perfect.
+If we limited to those examples on which they were more confident (confidence of 2 or 3), their accuracy raised to 42\%, but never surpassed that.
+A major problem for the human annotators is the amount of background knowledge required to solve this problem.
+On an easier domain, or with annotators who are truly experts, we might expect these numbers to be higher.
 
 \section{Proposed Research Directions}
 
 In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions.
-To make the system more general, it needs to be able to generalize to new context well. Towards this goal, we propose two new research directions:
+To enable our system to generalize well to new context, we propose two new research directions:
+%To make the system more general, it needs to generalize to new context well. Towards this goal, we propose two new research directions:
 
 \subsection{Template Based Question Generation}
 
- Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'',  ``What version of apt-get are you running?'', etc. We propose a following four step approach to our template based question generation method:
+ Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'',  ``What version of apt-get are you running?'', etc. We propose the following four step approach to our template based question generation method:
 
 \begin{enumerate}[noitemsep,nolistsep] 
-\item Identify groups of similar questions from a huge collection of questions.
-\item Generate a template for each group of questions.
-\item Given a post, select a question template from a set of candidate question templates.
-\item Fill in the blanks in the template using words relevant to the given post.
+\item Cluster questions based on their lexical and semantic similarity. % from a huge collection of questions.
+\item Generate a template for each cluster by removing topic specific words from questions.
+\item Given a post, select a question template from a set of candidate question templates using a model similar to our preliminary work.
+\item Finally, fill in the blanks in the template using topic specific words retrieved from the post. 
 \end{enumerate}
-
-For grouping similar questions together, we will use clustering algorithms which cluster documents based on their lexical and semantic similarity. For generating templates corresponding to each cluster, we will remove topic specific words like `Ubuntu', `apt-get', etc from a question using syntactic information (like parts-of-speech tags) and form generic templates. For selecting a right question template, given a post, we will use a model similar to our preliminary work. Finally, we will populate the blanks in the template using topic specific words retrieved from the given post. 
 
 \subsection{Neural Network Generative Model}
   
 Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation \cite{sutskever2014sequence}, dialog generation \cite{serban2016building}, etc. These models are based on an encoder-decoder framework where the encoder takes in a sequence of words and generates a vector representation of the input. The decoder then takes in this input representation and generates a sequence of words as its output. 
 
 On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model \cite{yin2015neural} built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. %Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. 
-Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post. Using this approach we thus incorporate the template based question generation method into a more general neural network framework.
+Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post, thus incorporating the template based method into a more general neural network framework.
 
 \section{Conclusion}
 
