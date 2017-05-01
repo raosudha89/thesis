@@ -153,7 +153,7 @@ language=Java,escapeinside={(*@}{@*)}}
 
 
 \title{
-{\bf Thesis Proposal Title}\\
+{\bf Teaching Machines to Ask Clarification Questions}\\
 \vspace{18pt}
 \it Preliminary Oral Exam (Thesis Proposal)}
 
@@ -167,7 +167,7 @@ University of Maryland, College Park\\
 
 \date{
 \vspace{42pt}
-Dissertation proposal submitted to: \\
+Dissertation Proposal submitted to: \\
 Department of Computer Science \\
 University of Maryland, College Park, MD 20742 \\
 \bigskip
@@ -179,9 +179,10 @@ University of Maryland, College Park, MD 20742 \\
 \begin{center}
 \begin{tabular}{lll}
 &\multicolumn{2}{l}{Advisory Committee:} \\ \\
-Dr. Hal Daume III & Chair/Advisor & U. of Maryland, College Park \\
-Dr. Philip Resnik & Advisor & U. of Maryland, College Park \\
-Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park 
+Dr. Hal Daum\`{e} III & Chair & U. of Maryland, College Park \\
+Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park \\
+Dr. Philip Resnik & Member & U. of Maryland, College Park \\
+Dr. Lucy Vanderwende & Member & Microsoft Research \\
 \end{tabular}
 \end{center}
 \end{table}%
@@ -199,7 +200,15 @@ Dr. David Jacobs & Dept's Rep & U. of Maryland, College Park
 \begin{abstract}
 \normalsize
 
-Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
+An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In case of a knowledge gap, the listener resorts to asking questions. With the advancements of artificial intelligence technologies, we increasingly find ourselves interacting with automated agents (like Apple's Siri, Amazon's Alexa, Google Home, etc) in naturally spoken languages. If we wish to make such human-bot interactions as efficient as human-human interactions are, it is important that we teach machines to ask clarification questions when faced with uncertainty or knowledge gaps.
+
+In the field of natural language processing, however, despite decades of work on question-answering, there has been little work in question asking. Moreover, most of the previous work has focused on generating reading comprehension style questions which, by definition, are answerable from the provided text. The goal of my dissertation work is to teach machines to ask clarification questions i.e. questions that point at the missing information in a text. Primarily, we focus on two scenarios where we find such question asking to be useful: (1) clarification questions on posts found in community-driven Q\&A forums like StackExchange (2) clarification questions during goal-oriented dialogue sessions. 
+
+In our first line of research, we study the problem of question generation using data from StackExchange, a plentiful online resource in which people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. We create a novel dataset using StackExchange and in our preliminary work, we address the question selection problem i.e. select the right clarification question from a set of prior questions. We develop a novel neural-network model inspired by the notion of expected value of perfect information: a good question is one whose expected answer is going to be most useful. To build more generalizable systems, in my first proposed work, I propose the following two strategies: (a) a template based question generation model and (b) an encoder-decoder based neural generative model.
+
+In our second line of research, we study the problem of question generation using the Ubuntu Dialogue Corpus, a two-way conversational data extracted systematically from chat logs where people discuss issues with their Ubuntu Operating system. In our preliminary work, we build a neural network model for the task of predicting the next best response given a context of a conversation using best practices in dialogue modeling coupled with our novel vocabulary selection strategies. In my second proposed work, I plan to build a novel strategy for generating a clarification question as the next response given different levels of context of a conversation. 
+
+In both the research ideas described so far, we learn to generate clarification questions statistically i.e. by looking at previously asked questions in a similar context. However as humans we infer a knowledge gap only when we understand what information completes a given use-case. Therefore, in my third proposed work, I plan to make use of external knowledge sources to understand what is missing in a given context and then ask a clarification question.  
 
 \end{abstract}
 
@@ -216,7 +225,12 @@ Asking questions is fundamental to communication, and machines cannot effectivel
 \chapter{Introduction}
 
 \section{Motivation}
-An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. The extent of informativeness depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing and thus attain a mutual understanding with the speaker. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.\\
+
+Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
+
+An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In doing so, the speaker assumes a certain common ground with the listener. In case of a knowledge gap, the listener resorts to asking questions. With human-bot interaction increasingly becoming common place, it is important we teach machines how to ask clarification questions so that it can attain a mutual understanding with the human. 
+
+The extent of informativeness depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing and thus attain a mutual understanding with the speaker. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.\\
 
 \noindent
 In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. For a machine to effectively collaborate with humans, it is important that it learns to ask a question when faced with uncertainty, a task of increasing importance in an automated society. For example, consider a scenario where an automated agent is trying to assist you in solving a problem. You will describe your problem to the agent. The agent on the other end has a certain understanding of what information is required to solve that problem. The agent can either make an assumption and work under uncertainty OR ask a question. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with such uncertainty or knowledge gaps
@@ -240,6 +254,7 @@ In our preliminary work, we focus on the question selection problem i.e. select 
 
 \noindent
 We study the problem of generation clarification questions in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \cite{} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. %Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. Our model, on the other hand, that captures a similar notion using what we call the `bursty vocabulary' i.e. we up-weight the words that occur frequently within the short context of a conversation, thus avoiding the need for manually crafting the list of coarse tokens. 
+Our model combines several best practices in dialogue modeling such as utterance level hierarchy, attention, character trigram histograms and context based vocabulary selection strategy. 
 We build a novel neural network based model using what we call the `bursty vocabulary' i.e. up-weighting the words that occur frequently within the short context of a conversation, thus indirectly giving more importance to topic words. This approach gives us significant improvements over current neural network baselines. In our next step, we propose to look at the responses in the conversations that are questions and build a model that learns to generate a question based response given different levels of context of a conversation.
 
 %this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
@@ -286,11 +301,23 @@ The character trigram histogram technique (Section~\ref{character_level_modeling
 
 \section{Template based question generation}
 
-Our preliminary work focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To enable our system to generalize better on new unseen cases, we propose a template based question generation method. Consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of linux are you running?'',  ``What version of apt-get are you running?'', etc. We propose a following four-step approach:  (1) Cluster questions based on their similarity; (2) Generate a template for each cluster of questions; (3) Given a post, select a question template from a set of candidate templates; and finally (4) Fill in the blanks in the template using words relevant to the given post.
+In our preliminary work, we focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To make the system more general, it needs to be able to generalize to unseen context well. For e.g. consider a scenario in which the post is talking about the application `apt-get' that the model has never seen in its past before. However, from the context, it can make out that the discussion is similar to a different discussion where the topic was the application `yum' and a plausible clarification question is asking for the version of the application. However, since it has not seen a clarification question like ``What version of yum are you using?'', it fails to generate one. To circumvent this generalization issue, we propose template based question generation method. For instance, consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We enumerate four steps of our template based question generation method:
+\begin{enumerate}
+\item Identify groups of similar questions from a huge collection of questions.
+\item Generate a template for each group of questions.
+\item Given a post, select a question template from a set of candidate question templates.
+\item Fill in the variables in the template using words relevant to the given post.
+\end{enumerate}
 
+For grouping similar questions together, we plan to explore some of the clustering algorithms which cluster documents based on their lexical and semantic similarity. A preliminary experiment of trying to cluster questions has revealed that the questions are too different from each other to form useful clusters. We therefore propose a different strategy in which we will remove topic specific words from the questions and then cluster them, thus forcing a generalization before grouping them. To generate templates corresponding to each cluster, we plan to further identify topic specific words from the question using syntactic information (like parts-of-speech tags) and then remove them to form generic templates. In the third step, given a post and a set of candidate question templates, we will select a template using a model similar to our preliminary work. Finally, in the fourth step, we plan to explore methods similar to slot filling approaches \cite{} to populate the blanks in the template with post specific words.
+
+\newpage
 \section{Sequence-to-sequence based question generation}
 
-Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation (Sutskever et.al. 2014), dialog generation (Serban, Iulian V., et al. 2016), etc. On similar lines, we propose a model for generating a clarification question one word at a time, given the words of a post. A recent neural generative question answering model (Yin, Jun, et al.  2016) built an answer language model which decides, at each time step, whether to generate a common vocabulary word or a answer word retrieved from a knowledge base. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a post specific word, thus incorporating the template based question generation method into a more general neural network framework.
+Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation (Sutskever et.al. 2014), dialog generation (Serban, Iulian V., et al. 2016), etc. The main idea behind these models is that they work on an encoder-decoder framework. The encoder model takes in the words of the input one word at a time, passes it through a recurrent neural network (or its variants like LSTM, GRU, etc) and generates a final vector representation of the input. The decoder, then, takes in this input representation and a start symbol and generates the words of the output one word at a time till it generates the end of sequence symbol. The model is trained using a large number of input/output sequences to minimize the perplexity between the generated output sequence and the true output sequence.\\
+
+\noindent
+On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model (Yin, Jun, et al.  2016) built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post. Using this approach we thus incorporate the template based question generation method into a more general neural network framework.
 
 \section{Clarification questions for dialog systems}
 
