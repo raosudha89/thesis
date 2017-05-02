@@ -145,20 +145,17 @@ Dr. Lucy Vanderwende & Member & Microsoft Research \\
 \begin{abstract}
 \normalsize
 
-An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In case of gaps in knowledge, the listener resorts to asking questions. With the advancements of artificial intelligence technologies, we increasingly find ourselves interacting with automated agents (like Apple's Siri, Amazon's Alexa, Google Home, etc) in naturally spoken languages. If we wish to make such human-bot interactions as efficient as human-human interactions are, it is important that we teach machines to ask clarification questions when faced with uncertainty or knowledge gaps.
+Inquiry is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. In the field of natural language processing, despite decades of work on question answering, there is relatively little work in question asking. Moreover, most of the previous work has focused on generating reading comprehension style questions which are answerable from the provided text. The goal of my dissertation work, on the other hand, is to teach machines to ask clarification questions pointing out the missing information in a text. Primarily, I focus on two scenarios where I find such question asking to be useful: (1) clarification questions on posts found in community-driven Q\&A forums like StackExchange (2) clarification questions during goal-oriented dialogue sessions. 
 
-In the field of natural language processing, however, despite decades of work on question-answering, there has been little work in question asking. Moreover, most of the previous work has focused on generating reading comprehension style questions which, by definition, are answerable from the provided text. The goal of my dissertation work, on the other hand, is to teach machines to ask clarification questions which point at the missing information in a text. Primarily, I focus on two scenarios where we find such question asking to be useful: (1) clarification questions on posts found in community-driven Q\&A forums like StackExchange (2) clarification questions during goal-oriented dialogue sessions. 
+In my first line of research, I study the problem of question generation using data from StackExchange, a plentiful online resource in which people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. In my preliminary work, I created a novel dataset using StackExchange and addressed the question selection problem, more specifically select the right clarification question from a set of prior questions. I developed a novel neural network model inspired by the notion of expected value of perfect information: a good question is the one whose expected answer is going to be the most useful. In my first proposed work, I plan to use the following two strategies to build more generalizable systems: (a) a template based question generation model and (b) an encoder-decoder based neural generative model.
 
-In my first line of research, I study the problem of question generation using data from StackExchange, a plentiful online resource in which people routinely ask clarifying questions to posts so that they can better offer assistance to the original poster. We create a novel dataset using StackExchange and address the question selection problem, more specifically select the right clarification question from a set of prior questions. We develop a novel neural network model inspired by the notion of expected value of perfect information: a good question is the one whose expected answer is going to be the most useful. To build more generalizable systems, in my first proposed work, I present the following two strategies: (a) a template based question generation model and (b) an encoder-decoder based neural generative model.
+In my second line of research, I study the problem of question generation using the Ubuntu Dialogue Corpus, a two-way conversational data extracted systematically from chat logs where people discuss issues with their Ubuntu Operating system. In my preliminary work, I addressed the task of predicting the next best response given a context of a conversation. I built a novel neural network model inspired by the best practices in dialogue modeling coupled with our novel vocabulary selection strategies. In my second proposed work, I plan to explore how can I generate a clarification question as the next response, given different levels of context of a conversation. 
 
-In my second line of research, I study the problem of question generation using the Ubuntu Dialogue Corpus, a two-way conversational data extracted systematically from chat logs where people discuss issues with their Ubuntu Operating system. In my preliminary work, we addressed the task of predicting the next best response given a context of a conversation. We built a novel neural network model inspired by the best practices in dialogue modeling coupled with our novel vocabulary selection strategies. In my second proposed work, I plan to explore how can we generate a clarification question as the next response, given different levels of context of a conversation. 
-
-In both the research ideas described so far, we took a purely data-driven approach to generating clarification questions i.e. learning to ask a question by looking at previously asked questions in a similar context. However, inferring a knowledge gap requires a certain level of domain knowledge that is currently lacking in our proposed models. Therefore, in my third proposed work, I plan to explore how can we use external knowledge sources to understand what is missing in a given context and then ask a clarification question. 
+In both the research agendas described so far, I took a purely corpus-driven approach to generating clarification questions i.e. learning to ask a question by looking at previously asked questions in a similar context. However, inferring a knowledge gap requires a certain level of domain knowledge that is currently lacking in our proposed models. Therefore, in my third proposed work, I plan to explore how can we use external knowledge sources to understand what is missing in a given context and then ask a clarification question. 
 
 \end{abstract}
 
 \pagebreak
-
 
 \tableofcontents
 \pagebreak
@@ -171,42 +168,44 @@ In both the research ideas described so far, we took a purely data-driven approa
 
 \section{Motivation}
 
-Asking questions is fundamental to communication, and machines cannot effectively collaborate with humans unless they can ask questions. Asking questions is also a natural way for machines to express uncertainty, a task of increasing importance in an automated society. Despite decades of work on question answering, there is relatively little work in question asking.
-
-An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In doing so, the speaker assumes a certain common ground with the listener. In case of a knowledge gap, the listener resorts to asking questions. With human-bot interaction increasingly becoming common place, it is important we teach machines how to ask clarification questions so that it can attain a mutual understanding with the human. 
-
-The extent of informativeness depends on the speaker's understanding of what she thinks is the common ground between the speaker and the listener. Communication is still possible because the listener makes use of this powerful tool of asking questions. By asking questions the listener can elicit information that she thinks is unclear or missing and thus attain a mutual understanding with the speaker. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.\\
+An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In case of gaps or mismatches in knowledge, the listener resorts to asking questions. With the advancements of artificial intelligence technologies, we increasingly find ourselves interacting with automated agents (like Apple's Siri, Amazon's Alexa, Google Home, etc) in naturally spoken languages. If we wish to make such human-bot interactions as efficient as human-human interactions are, it is important that we teach machines to ask clarification questions when faced with uncertainty or knowledge gaps.\\
 
 \noindent
-In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. For a machine to effectively collaborate with humans, it is important that it learns to ask a question when faced with uncertainty, a task of increasing importance in an automated society. For example, consider a scenario where an automated agent is trying to assist you in solving a problem. You will describe your problem to the agent. The agent on the other end has a certain understanding of what information is required to solve that problem. The agent can either make an assumption and work under uncertainty OR ask a question. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with such uncertainty or knowledge gaps
+In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty or knowledge gaps. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.
 
 \section{Research questions}
 
-About a decade ago, if you faced a technical problem the only way to solve it would be to go to an expert. Due to the recent surge in the use of internet, a lot of such problem solving happens online these days on question answering (Q\&A) forums where users post their problems and other users reply to them providing assistance. However \cite{asaduzzaman2013answering} observed that on StackExchange, one such community-driven problem solving platforms, many a times the posts go unanswered for a long time because they are not clear enough i.e. they are missing some information. Other users then ask clarification questions to those posts so that they can better offer assistance to the original poster. Our first research question is the following: \textit{Can we build a model that can learn to automatically generate a clarification question to a post by looking at clarification questions posted in the forum before?}\\
+About a decade ago, if you faced a technical problem the only way to solve it would be to go to an expert. Due to the recent surge in the use of internet, a lot of such problem solving these days happen online on question answering (Q\&A) forums where users post their problems and other users reply to them providing assistance. However, \newcite{asaduzzaman2013answering} observed that on StackExchange, which is one such community-driven problem solving platforms, many a times the posts go unanswered for a long time because they are not clear enough i.e. they are missing some information. Consequently, other users ask clarification questions to those posts so that they can better offer assistance to the original poster. Our first research question is the following: \textit{Can we build a model that can learn to automatically generate a clarification question to a post by looking at clarification questions posted in the forum before?}\\
 
 \noindent
-Human-bot interaction has become increasingly popular in recent times. Apple's siri, Amazon's alexa, IBM's watson are all examples of successful advancements in the Artificial Intelligence technology. These technologies are great when it comes to simple natural language based interactions like ``What is the weather like in New York City?'' OR ``Play me latest top 10 songs'', etc. However when one tries to use these interfaces for more complicated purposes like ``I can't start my laptop. Help me\!'', OR ``Find me a recipe for lasagne'', within a few interactions one would soon give up. One key reasons for such failures is the lack of common understanding between the human user and the bot. The human user has a certain understanding of the problem/request he has and many a times he fails to convey the same understanding to the bot. In such a scenario, the bot can be much more useful if it could try to establish this common understanding by asking relevant questions. Our second research question is: \textit{Can we build an interactive model that can learn to ask clarification questions when faced with uncertainty or a knowledge gap?}\\
+Human-bot interaction has become increasingly popular in recent times. Apple's siri, Amazon's alexa, Google Home, IBM's watson are all examples of successful advancements in the artificial intelligence technology. These technologies are great when it comes to simple natural language based interactions like ``What is the weather like in New York City?'' OR ``Play me latest top 10 songs'', etc. However when one tries to use these interfaces for more complicated purposes like ``I can't start my laptop. Help me\!'', OR ``Find me a recipe for lasagne'', within a few interactions one would soon give up. One key reasons for such failures is the lack of common understanding between the human user and the bot. The human user has a certain understanding of the problem/request he has and many a times he fails to convey the same understanding to the bot. In such a scenario, the bot can be much more useful if it could try to establish this common understanding by asking relevant questions. Our second research question is the following: \textit{Can we build an interactive model that can learn to ask clarification questions when faced with uncertainty or a knowledge gap?}\\
 
 \noindent
 % clarification question with the help of knowledge base i.e. find out what is missing and then ask a question
 
 \section{Proposed solutions}
 
-In order to learn how to ask clarification questions, we build a model inspired by the decision theoretic framework of expected value of perfect information (EVPI). EVPI is a measurement of of the value of gathering information. A good question is the one whose likely answer is going to be the most useful. In our setting, we use EVPI to calculate which question is most likely to elicit an answer that would make the post more informative. On StackExchange, users routinely ask clarification questions to post. The author of the post subsequently edits the post answering the question. We mine many (post, question, answer) triples using StackExchange's edit histories. We extract the initial post as p, question posted in the comments section as q, and edit to the original post as answer a to form our (p,q,a) triples. Using this data, we build our EVPI inspired neural network model which learns to ask a clarification question given a post.\\
+In order to learn how to ask clarification questions, we build a model inspired by the decision theoretic framework of expected value of perfect information (EVPI). EVPI is a measurement of the value of gathering information. A good question is the one whose likely answer is going to be the most useful. In our setting, we use EVPI to calculate which question is most likely to elicit an answer that would make the post more informative. On StackExchange, users routinely ask clarification questions to post. The author of the post subsequently edits the post answering the question. We mine many (post, question, answer) triples using StackExchange's edit histories. We extract the initial post as p, question posted in the comments section as q, and edit to the original post as answer a to form our (p,q,a) triples. Using this data, we build our EVPI inspired neural network model which learns to ask a clarification question given a post.\\
 
 \noindent
-In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions. Given a post, we first generate a set of candidate questions by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene \footnote{https://lucene.apache.org/}, a software extensively used in information retrieval for extracting documents relevant to a given query from a pool of documents. To enable our system to generalize better on new unseen cases, we propose two research directions: a template based question generation method where we first generate templates and then fill in the variables using the current context of the post; and a sequence-to-sequence based neural generative model where we generate the question one word at a time given a post.\\
+In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions. Given a post, we first generate a set of candidate questions by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene \footnote{https://lucene.apache.org/}, a software extensively used in information retrieval for extracting documents relevant to a given query from a pool of documents. To enable our system to generalize better on new unseen cases, we propose two research directions: a template based question generation method where we first generate templates and then fill in the variables using the current context of the post; and a sequence-to-sequence based neural generative model where we generate the question one word at a time given a post. \\
 
 \noindent
-We study the problem of generation clarification questions in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \cite{} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. %Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. Our model, on the other hand, that captures a similar notion using what we call the `bursty vocabulary' i.e. we up-weight the words that occur frequently within the short context of a conversation, thus avoiding the need for manually crafting the list of coarse tokens. 
-Our model combines several best practices in dialogue modeling such as utterance level hierarchy, attention, character trigram histograms and context based vocabulary selection strategy. 
-We build a novel neural network based model using what we call the `bursty vocabulary' i.e. up-weighting the words that occur frequently within the short context of a conversation, thus indirectly giving more importance to topic words. This approach gives us significant improvements over current neural network baselines. In our next step, we propose to look at the responses in the conversations that are questions and build a model that learns to generate a question based response given different levels of context of a conversation.
+We study the problem of clarification question generation in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \newcite{} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. \\
 
-%this para -- we also explore question generation in dialogue setting. work in dialogue -- next utterance classification -- moving on to generating questions in mult-turn dialogue -- generative models on ubuntu dialogue dataset
+\noindent
+Our model, on the other hand, that captures a similar notion using what we call the `bursty vocabulary' i.e. we up-weight the words that occur frequently within the short context of a conversation, thus avoiding the need for manually crafting the list of coarse tokens. We build a novel neural network based model that combines several best practices in dialogue modeling such as utterance level hierarchy, attention, character trigram histograms and context based vocabulary selection strategy. This approach gives us significant improvements over current neural network baselines. In our next step, we propose to look at the responses in the conversations that are questions and build a model that learns to generate a question based response given different levels of context of a conversation. We will combine both the template based approach and the neural generative approach described before to generate the question based response. \\
+
+\noindent
+Finally, in our last proposed work, we plan to explore how can we make use of external knowledge sources to determine what information is missing in the given context and then ask a question probing for that missing information. Traditional dialogue systems \cite{} can be viewed as methods for slot-filling where a question is generated during a dialogue specifically with the purpose of filling a set of slots defined in a structured knowledge base. On the contrary, in our work, we are interested in using unstructured knowledge sources like the Wikipedia to identify a missing information. We plan to use the domains of StackExchange such as academia, music, mythology, etc where participating in the Q\&A requires quite a lot of background knowledge. Our clarification question generation model for posts on these domains will then extract relevant information from Wikipedia before it generates a question. 
+
+\section{Organization}
+
+Chapter~\ref{background} gives a brief review of the current methods for question generation, a review of the neural network models used in natural language processing tasks and finally a review of the current methods for dialogue modeling. Chapter~\ref{stackexchange} describes our preliminary work on generating clarification questions for posts on StackExchange. Chapter~\ref{dialogue_focus_tracking} describes our work on zero-pronoun resolution in the context of dialogues where we develop a model to track the focus shift and show that using this information gives us significant improvement on the task of zero-pronoun resolution over current approaches. Chapter~\ref{dialogue_next_response} describes our preliminary work on dialogue modeling where we develop a neural network model for generating next response given the context of a conversation. Chaper~\ref{proposed_work} describes our three proposed work extending our preliminary work on clarification question generation. Chaper~\ref{conclusion} concludes our proposal and describes a timeline for our remaining proposed works.
 
 \newpage
 
-\chapter{Related work}
+\chapter{Background}\label{background}
 
 \section{Question Generation}
 
@@ -234,7 +233,7 @@ The character trigram histogram technique (Section~\ref{character_level_modeling
 
 \newpage
 
-\chapter{Generating clarification questions on StackExchange posts}
+\chapter{Generating clarification questions on StackExchange posts}\label{stackexchange}
 
 \section{Introduction}\label{introduction}
 
@@ -279,41 +278,7 @@ Given these two models, at prediction time we search over a shortlist of possibl
 We are able to train these models jointly based on $(p,q,a)$ triples that we extract automatically from StackExchange.
 Figure~\ref{askubuntu_post} depicts how we do this using StackExchange's edit history.  In the figure, the initial post fails to state what version of Ubuntu is being run. In response to Parker's question in the comments section, Terry, the author of the post, edits the post to answer Parker's clarification question. We extract the initial post as $p$, question posted in the comments section as $q$, and edit to the original post as answer $a$ to form our $(p,q,a)$ triples. 
 
-Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines, even when our system builds on strong information retrieval scaffolding. In comparison, without this scaffolding, the bag-of-ngrams model outperforms the feedforward network. We additionally analyze the difficulty of this task for non-expert humans, and give examples of system output. %on which our system does well, and several on which it does poorly.
-
-
-%Questions posted in the comments section often times include possible solutions or suggestions phrased as a rhetorical question. To filter out such non-clarification questions, we further train a classifier on a small set of questions labelled as clarification/non-clarification using a crowdsourcing platform. We compare the predictions of our model with human judgements obtained on a small held out test set and TODO
-% consisting of initial posts $p$, clarification questions in the comments section
-
-%the first estimates, for any hypothetical answer, how much more \emph{complete} the original post would be if this answer were added to it;
-%the second estimates, for any fixed question, what is the likelihood of a possible ans
-%Figure~\ref{model} depicts the following three components of our EVPI inspired model: 
-%\begin{enumerate}
-%\item For a given unanswered post $p_i$, we generate a set of question candidates $Q_i$ by looking at questions that were asked to posts similar to the unanswered post $p_i$ %(Section~\ref{candidate_question_generator})
-%\item For each of the candidate questions $q_{j} \in Q_i$, we generate an answer representation $a_{j}$ given the unanswered post  $p_i$ and the candidate question $q_{j}$ %(Section~\ref{answer_generator})
-%\item Finally we calculate the utility of each of the updated posts $(p_i + a_{j})$ and output the question that maximized the utility of the updated post %(Section~\ref{utility_calculator})
-%\end{enumerate}
-
-% Our model for $\mathbb{P}[a~|~p,q]$ takes the text of a post $p$ and an answer $q$ and runs them through LSTMs to obtain a single embedding.
-% Answers $a$ are represented using embeddings and the model is trained to minimize the distance between the answer and the embedding of $(p,q)$.
-% The probability model over $a$ then takes the form of a Gaussian centered around the embedding of $(p,q)$.
-% Our model for $U(p+a)$ takes an \emph{average} embedding of the sentences in $p$ and the embedding of $a$ and produces an estimate $U(p+a)$ that ranges in $[0,1]$ for how complete this post is.
-
-% In order to train our model, we use two complementary datasets, one for estimating $\mathbb{P}[a~|~p,q]$ and one for estimating $U(p+a)$.
-% Although these two components are trained on different datasets, they are trained jointly to optimize an answer selection criterea. TODO is this true?
-% To train the answer predictor, we use the \emph{edit history} of StackExchange, as depicted in Figure~\ref{askubuntu_post}. 
-% We extract initial posts $p$, questions from the comments section $q$, and answers from edits to the initial post $a$ to form $(p,q,a)$ triples.
-% To train the completeness predictor, we can use a much larger dataset comprised of posts-which-eventually-get-answers (positive examples for completeness) and posts-which-remain-unanswered (negative examples).
-% Although this labeling is noisy, \newcite{asaduzzaman2013answering} suggest that a primary reason that StackExchange posts remain unanswered is due to incompleteness.
-
-%We train our model using a neural network framework to minimize an objective function defined using EVPI. We compare our model with a bag-of-words baseline and a neural baseline; both which are trained to select the right question given a post and question candidates; without generating an answer for the question. Human judgements on a held out test set of unanswered posts show that our EVPI inspired model can learn to ask questions better.
-
-%We can mine many (post, question, answer) triples from StackExchange's edit histories. In the figure, the initial post fails to state what version of Ubuntu is being run. A person then asked for the Ubuntu version in the comments section. Next, the original poster edited their post, answering the clarification question. Based on this data, we will learn how to choose what question would be most useful to ask. A good question is one whose answer is most likely to help someone respond to the initial request, a notion captured in the theory of expected value of perfect information.
-
-
-%\iffalse
-%-- we show that we can train two different models when we have varied amount of training data? (ask Hal)
-%\fi
+Our results show significant improvements from using the EVPI formalism over both standard feedforward network architectures and bag-of-ngrams baselines, even when our system builds on strong information retrieval scaffolding. In comparison, without this scaffolding, the bag-of-ngrams model outperforms the feedforward network. We additionally analyze the difficulty of this task for non-expert humans, and give examples of system output. 
 
 \begin{figure*}[t]
 \centering
@@ -329,10 +294,6 @@ The problem of question generation has received sparse attention from the natura
 Outside reading comprehension questions, \newcite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
 \newcite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
 
-%The problem of question generation has received sparse attention from the natural language processing community. In fact, we know of no work that addresses the problem of generating clarification questions. Most prior work has focused on generating reading comprehension questions \cite{vanderwende2008importance,penas2010filling,heilman2011automatic,olney2012question}: given text, write comprehension questions that one might find on a standardized test. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. 
-%
-%Outside reading comprehension questions, \newcite{labutov2015deep} studied the problem of generating question templates via crowdsourcing, which leads to significantly less data that we can collect. \newcite{liu2010automatic} use template question generation to help authors write better related work sections. \newcite{mostafazadeh2016generating} consider question generation from images, which may or may not be clarifications TODO note we don't guarantee ours are clarification either :P. \newcite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser.
-
 \section{Model description}\label{model}
 
 In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$ that we can ask, there is set $A$ of possible answers that could be given. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The value of this question $q$ is the expected utility, over all possible answers. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
@@ -345,10 +306,12 @@ In Eq~\ref{evpi_equation}, $p$ is the post, $q$ is a potential question from a s
 \textsf{\small (c)} will have high utility only for a low probability answer.
 
 The modeling question then is how to model: 
-%\begin{enumerate}[noitemsep,nolistsep]
-(1) the probability distribution $\mathbb{P}[a | p,q]$ and
-(2) the utility/completeness function $\U(p+a)$.
+\begin{enumerate}[noitemsep,nolistsep]
+\item the probability distribution $\mathbb{P}[a | p,q]$ and
+\item the utility/completeness function $\U(p+a)$.
+\end{enumerate}
 In our work, both will be represented using neural networks over the appropriate inputs. Posts, questions and answers will all be represented as embeddings. We train the parameters of the two models jointly to minimize a joint loss defined such that an answer that has a higher potential of increasing the utility of a post gets a higher probability.
+
 
 Figure~\ref{model} describes the behavior of our model during test time. 
 Given a post $p$, our first step is to generate a set of candidate questions and a set of candidate answers (Section~\ref{question_candidate_generator}).
@@ -421,7 +384,8 @@ StackExchange is a network of online question answering websites about varied to
 \textbf{Extract questions:} For each such initial version of the post, we use the timestamp information of its comments to identify the first comment made to the post. We look for a question mark `?' token to further identify if its a question comment. Finally, we truncate the comment till the question mark token to retrieve the question part of the comment.\\
 \textbf{Extract answers:} In our final step, we identify the edit made to the post in response to the question comment. Authors make edits to their posts for several reasons; including stylistic updates and grammatical corrections. Therefore, we use only those edits that are longer than four words and finally use the timestamp information of the edit to match the edits to their respective question comments.
 
-%We extract a total of 38,041 (\textit{post, question, answer}) triples from StackExchange which are distributed across three domains: askubuntu (13,749), unix (6656), and superuser (17,636). We train our models using 80\% of the data, tune our hyper parameters using 10\% of the data and evaluate our models using the remaining 10\% of the data. Table~\ref{data_statistics} shows the sizes of the train, dev and test splits for the three domains. 
+We extract a total of 38,041 (\textit{post, question, answer}) triples from StackExchange which are distributed across three domains: askubuntu (13,749), unix (6656), and superuser (17,636). We train our models using 80\% of the data, tune our hyper parameters using 10\% of the data and evaluate our models using the remaining 10\% of the data. Table~\ref{data_statistics} shows the sizes of the train, dev and test splits for the three domains. 
+
 \begin{table}
 \centering
 \begin{tabular}{lccc}
@@ -453,10 +417,6 @@ Our primary research questions that we evaluate experimentally are:
 
 \item How much harder is the task when the (distrator) candidate questions come from Lucene rather than selected randomly?\footnote{A common strategy with the Ubuntu dialogue corpus \cite{lowe2015ubuntu} is to train a dialogue system by choosing a best response given a context of a conversation and a set of candidate responses. However, these methods generate their candidates from their dataset using random sampling. This plausibly makes the task significantly easier than using Lucene to select candidates, which are much more likely to be confusable and have high lexical overlap.}
 \end{enumerate}
-
-% In contrast, we generate our candidates using Lucene, a well-known information retrieval system, and so our candidate questions are more closer to each other than a randomly sampled questions would have been. Thus, we indirectly define a harder task. To compare how our models perform in an easier configuration, we design our experiments on two task setups (Section~\ref{task_setup}). To understand the leverage our EVPI inspired model gets us, we compare our model with non-neural baselines and feedforward neural baselines (Section~\ref{baselines}). 
-
-% Further, we design another experiment where in equation~\ref{evpi_equation}, instead of choosing the question that maximizes the expected utility over all possible answers (EVPI max), we choose the question whose answer has the maximum utility (EVPI sum). This experiment helps us understand the leverage we are getting by summing over all our answer candidates, further strengthening the case for our EVPI inspired model. 
 
 \begin{table*}[t]
 \small
@@ -493,22 +453,13 @@ We compare our model with the following baselines:\\
 
 \subsection{Dataset}\label{dataset}
 We evaluate our model and our baselines on the following three domains of StackExchange: askubuntu, unix and superuser.
-% \begin{description}
-% \item[askubuntu:]  A question and answer site for users of the Ubuntu Operating system where people post queries about issues they face while using Ubuntu. An example question on this site: ``\textsf{\small Why isn't Chromium up-to-date in all the Ubuntu LTS repos, like Firefox is?}''
-% \item[unix:]  A question and answer site for users of Linux, FreeBSD and other unix-like operating systems. This site would contain questions like the ones in askubuntu and more. An example question on this site: ``\textsf{\small How to repeatedly alternate between two (or more) commands?}''
-% \item[superuser:] A question and answer site for users of all kinds of operating systems and computer applications. An example question on this site: ``\textsf{\small What is the LAST version of Windows Operating system that can run DOS applications natively?}''
-% \end{description}
-%
+ \begin{description}
+ \item[askubuntu:]  A question and answer site for users of the Ubuntu Operating system where people post queries about issues they face while using Ubuntu. An example question on this site: ``\textsf{\small Why isn't Chromium up-to-date in all the Ubuntu LTS repos, like Firefox is?}''
+ \item[unix:]  A question and answer site for users of Linux, FreeBSD and other unix-like operating systems. This site would contain questions like the ones in askubuntu and more. An example question on this site: ``\textsf{\small How to repeatedly alternate between two (or more) commands?}''
+ \item[superuser:] A question and answer site for users of all kinds of operating systems and computer applications. An example question on this site: ``\textsf{\small What is the LAST version of Windows Operating system that can run DOS applications natively?}''
+ \end{description}
+
 Table~\ref{data_statistics} shows the data statistics for the four sites above.  Although StackExchange consists of many sites, we choose the ones above because: a) The data dump available for them were moderately big in size to train a model on; b) These domains contain clarifications questions that are generic enough to be useful for many different posts; and finally c) The three domains were close enough so that we could combine them to create our full dataset of ~37K triples.
-
-%\subsection{Experimental details}
-
-%\paragraph{Preprocessing:} Each post, question and answer in our dataset of $(post, question, answer)$ triples is represented using embeddings. To generate these embeddings, we first tokenize the raw text in our post, question and answer. We restrict our post to be just the first 100 tokens of the post and our question and answer to be first 10 of their tokens respectively. Given these tokens we then use our word embeddings model to generate their embeddings.
-
-%\paragraph{Word embedding model:} We train 100 dimensional word embeddings using GloVe \cite{pennington2014glove} on the 3 billion token datadump of StackExchange. We use a threshold frequency of 100 to create our vocabulary of ~250,000 tokens. 
-%We then train a GloVe model on the datadump to get embeddings of size 100 for each token in our vocabulary. All tokens with a frequency of less than 100 in our dataset get assigned an `UNK'  token.
-
-%\paragraph{Model hyperparameters:}  For our feed-forward neural network, we use two fully-connected dense hidden layers each of size 100. We use ReLU \cite{nair2010rectified} non-linearity as our activation function between the hidden layers. 
 
 \subsection{Results}
 
@@ -573,7 +524,7 @@ Second, to make question generation more general, systems need to be able to gen
 
 \newpage
 
-\chapter{Dialogue focus tracking for zero pronoun resolution}
+\chapter{Dialogue focus tracking for zero pronoun resolution}\label{dialogue_focus_tracking}
 
 \section{Introduction}
 
@@ -591,7 +542,7 @@ Our work departs from mainstream work on zero pronoun resolution in that we focu
 
 We propose a model for resolving deictic zero pronouns that draws inspiration from ideas in Centering Theory \cite{grosz1995centering}: discourses tend to settle on a particular \emph{focus} for a time, before switching. Furthermore, we presume that \emph{when} a switch happens, there is likely to be an overt cue of this. For example, in Figure~\ref{sms-ex}, the initial focus on \speaker{T} is signaled with the overt second person pronoun in the first utterance; the switch of focus to \speaker{S} in the third utterance is also signaled by an overt ``you.'' However, at that point, the focus remains on \speaker{S} for several utterances until ``The last round\dots'' at which point it switches away from the speakers. It is brought back to \speaker{S} in the last utterance, which can be inferred from the fact that \speaker{S} is the most recent focus that fits the required semantic constraints.
 
-To account for these phenomena, \textbf{we develop a novel sequential model for zero pronoun resolution that explicitly tracks the conversation focus in a dialogue} (Section~\ref{model}). We test, using data from Chinese SMS (``texting'') dialogues, the hypothesis that our model can predict the identity of pronouns (at a granularity of the person attribute: first, second, or third person---with particular focus on first and second person) based on a variety of features of the utterance context, without reference to a particular antecedent (Section~\ref{efficacy}). In this way, we address a much higher percentage of the zero pronouns found in Chinese texts, and particularly in dialogue.
+To account for these phenomena, \textbf{we develop a novel sequential model for zero pronoun resolution that explicitly tracks the conversation focus in a dialogue} (Section~\ref{focus_tracking_model}). We test, using data from Chinese SMS (``texting'') dialogues, the hypothesis that our model can predict the identity of pronouns (at a granularity of the person attribute: first, second, or third person---with particular focus on first and second person) based on a variety of features of the utterance context, without reference to a particular antecedent (Section~\ref{efficacy}). In this way, we address a much higher percentage of the zero pronouns found in Chinese texts, and particularly in dialogue.
 
 Our second contribution is to show that \textbf{one can train a zero pronoun resolution system using supervision coming from English translations of the Chinese text} (Section~\ref{taa}). This obviates the need for expensive linguistic annotation of Chinese and allows us to use plentiful parallel data to train our model. Our results confirm that even though this ``translation as annotation'' process is noisy%\footnote{The noise is due to technical issues plus the fact that in informal settings, English \emph{does} allow some subject pronouns to be dropped.}
 , it is still possible to learn on large amounts of ``bronze standard'' data.% than small amounts of ``gold standard'' data (Section~\ref{TODO}).
@@ -649,7 +600,7 @@ We hypothesize comparable distribution between zero pronouns in a pro-drop langu
 To be more concrete, the original Mandarin SMS conversation from Figure~\ref{sms-ex} is reproduced in Table~\ref{conv}, together with a human translation into English.
 Indeed, we see in the example in Figure~\ref{sms-ex} that the zero pronouns on the Chinese side correspond to overt pronouns on the English side. For this reason we make use of a parallel (Chinese/English) corpus for training of our sequence labeling model, deriving the identities of missing pronouns from the English translation of the Chinese text rather than from coreference relations with antecedents in the Chinese text. Our model thus does not rely on the availability of hand-annotated data for training. 
 
-\section{Our focus tracking model}\label{model}
+\section{Our focus tracking model}\label{focus_tracking_model}
 
 Given a Chinese dialogue, our goal is to identify zero pronouns and resolve them either as deictic (first or second person) or anaphoric (third person). We use off-the-shelf tools for the identification of the zero pronouns (described in Section~\ref{setup}) and focus on the \emph{resolution} task.
 
@@ -722,7 +673,7 @@ We cast the above model as a sequence labeling problem over visible and hidden l
 
 To train the sequence labeling model, we use an online variant of the DAgger imitation learning algorithm \cite{ross11dagger} as implemented in the Vowpal Wabbit machine learning library \cite{langford2007vowpal,daume2014efficient}. DAgger, like its predecessor \textsc{Searn} \cite{daume2009search}, solves structured prediction problems by transforming them into sequential decision making problems. In the case of sequence labeling, the natural order for sequence decision making is left-to-right. At test time, inference is performed greedily. At training time, the learning algorithm attempts to balance between training on ``oracle'' states (prefixes of decisions made optimally according to the true labels) and training on ``system'' states (prefixes of decisions made sub-optimally according to the learned model). The online variant of DAgger balances this trade-off by slowly transitioning from making past decisions optimally to making them using the currently learned predictor.
 
-\section{Experiments} \label{experiments}
+\section{Experiments} \label{focus_tracking_experiments}
 
 Our goal in our experiments is to answer the following questions:
 
@@ -907,8 +858,6 @@ These approaches are mostly complementary to our task, since they focus on resol
 
 The only work we are aware of that does not require linguistically annotated data for zero pronoun resolution is that of \cite{chenchinese}. They hypothesize that zero pronouns and overt pronouns have \emph{similar} distributions, and train an unsupervised model on \emph{overt} pronouns and then apply this model to \emph{zero} pronouns. This model performs on par with their previous (2013) supervised model. Despite this, their unsupervised model only agrees with their supervised model on 55\% of zero pronoun antecedents, suggesting that this hypothesis is weak.
 
-%TODO: should the following paragraph go back in section 2??? and then just back-reference it here? it feels more appropriate there.... [TODO (note for Hal): I tried moving the paragraph earlier, but couldn't see a god place for it ...] 
-
 In particular, the complementarity of zero versus overt pronoun usage has been studied within various domains of linguistics. The Position of Antecedent Hypothesis \cite{carminati2002processing} states that null and overt pronouns have different antecedent selection preferences: null pronouns prefer antecedents in subject positions, while overt pronouns prefer antecedents in non-subject positions. This hypothesis has been supported by studies in a variety of pro-drop languages (e.g., \cite{alonso2002null} \cite{kweon2011processing}). Switching of reference has been identified as one of the main constraints regulating use of zero versus overt pronouns in the variationist literature (see \cite{cameron1992pronominal} for sociolinguistic studies of the phenomenon in Spanish).% However these constraints on zero versus overt pronoun distribution have not been clearly captured and utilized in techniques for pronoun resolution and restoration. 
 
 Our main result shows that although our bronze standard labels are noisy (Section~\ref{efficacy}), they are nonetheless for learning to resolve deictic pronouns. Moreover, one oft-heralded advantage of the translation-as-annotation scheme \cite{carpuat07psd} is that it naturally integrates into a machine translation framework, since one is learning to predict precisely what is necessary for successful translation; evaluating whether this hypothesis is true is currently an open question.
@@ -916,7 +865,7 @@ Our main result shows that although our bronze standard labels are noisy (Sectio
 
 \newpage
 
-\chapter{Generating next response during two-way conversation}
+\chapter{Generating next response during two-way conversation}\label{dialogue_next_response}
 
 \section{Introduction}
 
@@ -1018,7 +967,7 @@ Most modeling of text for various natural language processing tasks have been do
 We reduce the dimensionality of the trigram histogram vector using Principal component analysis (PCA) \cite{tipping1999probabilistic} and concatenate it with the word embedding to get our final word representation. The representations of two words that have small edit distance will have larger inner product, thus facilitating statistical transfer between them.
 %This yields two interesting properties.  First, the representations for two tail tokens that have small edit distance will have larger inner product than if the edit distance were large, facilitating statistical transfer between tail terms of low edit distance.  Second, the use of dropout on the input variables will facilitate statistical transfer between head terms and tail terms with small edit distance, as the one-hot portion of the representation will sometimes be dropped out.
 
-\section{Experiments and Results}\label{experiments_results}
+\section{Experiments and Results}\label{ubuntu_experiments_results}
 
 We evaluate our models on the Ubuntu Dialogue corpus\footnote{We use version 2 of the dataset where negative sampling is not uniform, thus increasing the difficulty of identifying the next utterance.} which consists of one million dialogues. Out of this 2\% is set aside as the test set, 2\% as the validation set and the rest is used for training. The task is set up as a ranking task where given $n$ responses, a system's ranking is considered as correct if the correct response is among the first $k$ candidates. We report recall values with $(n,k)$ as $(2,1), (10, 1), (10, 2)$ and $(10, 5)$. 
 
@@ -1047,7 +996,7 @@ Although our methods have been inspired by the atypical word usage in dialogues,
 
 \newpage
 
-\chapter{Proposed Work}
+\chapter{Proposed Work}\label{proposed_work}
 
 \section{Template based question generation}
 
@@ -1075,8 +1024,10 @@ In our preliminary work we developed a model for generating a clarification ques
 
 \newpage
 
+\chapter{Conclusion and Timeline}\label{conclusion}
+
 \begin{small}
-\bibliographystyle{acl2017}
+\bibliographystyle{acl_natbib}
 \bibliography{proposal}
 \end{small}
 
