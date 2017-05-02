@@ -83,7 +83,12 @@
 \Crefname{section}{\S}{\S\S}
 
 \RequirePackage{natbib}
-\newcommand\newcite{\citet}
+% for citation commands in the .tex, authors can use:
+% \citep, \citet, and \citeyearpar for compatibility with natbib, or
+% \cite, \newcite, and \shortcite for compatibility with older ACL .sty files
+\renewcommand\cite{\citep}	% to get "(Author Year)" with natbib    
+\newcommand\shortcite{\citeyearpar}% to get "(Year)" with natbib    
+\newcommand\newcite{\citet}	% to get "Author (Year)" with natbib   
 
 \newcommand{\topic}[1]{\vspace{-3.5pt}\smallskip \smallskip \noindent{\bf #1:}}
 \newcommand{\stitle}[1]{\vspace{0.5em}\noindent\textbf{#1}}
@@ -191,13 +196,13 @@ In order to learn how to ask clarification questions, we build a model inspired 
 In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions. Given a post, we first generate a set of candidate questions by identifying posts similar to the given post and then looking at the questions asked to those posts. For identifying similar posts, we use Lucene \footnote{https://lucene.apache.org/}, a software extensively used in information retrieval for extracting documents relevant to a given query from a pool of documents. To enable our system to generalize better on new unseen cases, we propose two research directions: a template based question generation method where we first generate templates and then fill in the variables using the current context of the post; and a sequence-to-sequence based neural generative model where we generate the question one word at a time given a post. \\
 
 \noindent
-We study the problem of clarification question generation in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \newcite{} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. \\
+We study the problem of clarification question generation in a dialog setting using the Ubuntu Dialog corpus, a large corpus recently put together by \newcite{lowe2015ubuntu} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work, we consider the problem of next utterance classification i.e. given a context of a conversation and a set of possible next responses, choose the correct next response. Recently, \cite{serban2016multiresolution} proposed a multi-resolution recurrent neural network model where they generate the high-level coarse tokens like nouns, entities and activities using a separate layer in their model thus indirectly giving more importance to the topic words in a conversation. \\
 
 \noindent
 Our model, on the other hand, that captures a similar notion using what we call the `bursty vocabulary' i.e. we up-weight the words that occur frequently within the short context of a conversation, thus avoiding the need for manually crafting the list of coarse tokens. We build a novel neural network based model that combines several best practices in dialogue modeling such as utterance level hierarchy, attention, character trigram histograms and context based vocabulary selection strategy. This approach gives us significant improvements over current neural network baselines. In our next step, we propose to look at the responses in the conversations that are questions and build a model that learns to generate a question based response given different levels of context of a conversation. We will combine both the template based approach and the neural generative approach described before to generate the question based response. \\
 
 \noindent
-Finally, in our last proposed work, we plan to explore how can we make use of external knowledge sources to determine what information is missing in the given context and then ask a question probing for that missing information. Traditional dialogue systems \cite{} can be viewed as methods for slot-filling where a question is generated during a dialogue specifically with the purpose of filling a set of slots defined in a structured knowledge base. On the contrary, in our work, we are interested in using unstructured knowledge sources like the Wikipedia to identify a missing information. We plan to use the domains of StackExchange such as academia, music, mythology, etc where participating in the Q\&A requires quite a lot of background knowledge. Our clarification question generation model for posts on these domains will then extract relevant information from Wikipedia before it generates a question. 
+Finally, in our last proposed work, we plan to explore how can we make use of external knowledge sources to determine what information is missing in the given context and then ask a question probing for that missing information. Traditional dialogue systems \cite{lemon2006isu} can be viewed as methods for slot-filling where a question is generated during a dialogue specifically with the purpose of filling a set of slots defined in a structured knowledge base. On the contrary, in our work, we are interested in using unstructured knowledge sources like the Wikipedia to identify a missing information. We plan to use the domains of StackExchange such as academia, music, mythology, etc where participating in the Q\&A requires quite a lot of background knowledge. Our clarification question generation model for posts on these domains will then extract relevant information from Wikipedia before it generates a question. 
 
 \section{Organization}
 
@@ -212,7 +217,8 @@ Chapter~\ref{background} gives a brief review of the current methods for questio
 The problem of question generation has received sparse attention from the natural language processing community. Most prior work focuses on generating reading comprehension questions:  given text, write questions that one might find on a standardized test \cite{vanderwende2008importance,heilman2011automatic,rus2011question,olney2012question}.  Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not.  
 
 Outside reading comprehension questions, \cite{labutov2015deep} generate high-level question templates by crowdsourcing and given a text segment, rank question templates that are relevant. However the crowdsourcing method of collecting data leads to significantly less data than we collect using our method. \cite{liu2010automatic} use template question generation to help authors write better related work sections. \cite{mostafazadeh2016generating} introduce a Visual Question Generation task where they consider question generation from images, a multi-modal variant of question generation. 
-\cite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. \cite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
+\cite{penas2010filling} identify the notion of missing information similar to us but they attempt to fill the knowledge gaps in a text with the help of external knowledge bases, whereas we instead ask clarification questions. 
+\cite{artzi2011bootstrapping} use human-generated clarification questions to drive a semantic parser where the clarification questions are aimed towards simplifying a user query; whereas we generate clarification questions aimed at  identifying missing information in a text. 
 
 - Question generation shared task: http://www.aclweb.org/anthology/W11-2853
 
@@ -220,15 +226,15 @@ Outside reading comprehension questions, \cite{labutov2015deep} generate high-le
 
 \section{Dialogue modeling}
 
-Following the introduction of the Ubuntu dialogue dataset, there has been several recent work in modeling dialogue that uses this dataset. \cite{DBLP:conf/sigdial/LowePSP15} describe two neural network baseline models using Recurrent Neural Network (RNN) and Long Short Term Memory (LSTM). 
-\cite{DBLP:journals/corr/KadlecSK15} create an ensemble of LSTMs, Bi-LSTMs and CNNs to get improved baselines. 
+Following the introduction of the Ubuntu dialogue dataset, there has been several recent work in modeling dialogue that uses this dataset. \cite{lowe2015ubuntu} describe two neural network baseline models using Recurrent Neural Network (RNN) and Long Short Term Memory (LSTM). 
+\cite{kadlec2015improved} create an ensemble of LSTMs, Bi-LSTMs and CNNs to get improved baselines. 
 \cite{xu2016incorporating} incorporate domain knowledge by enhancing their LSTM model with a recall gate.
 \cite{serban2016hierarchical} introduce a latent variable hierarchical recurrent encoder-decoder model by adding a context level RNN that processes sequences of sub-sequences operating on top of the token level RNN.
 \cite{serban2016multiresolution} take a similar hierarchical approach but instead of defining a latent coarse representation, they assume it to be observed and experiment with two such representations (sequence of nouns and sequence of activities and entities).
 \cite{baudivs2016sentence} introduce a unified approach for scoring sentence pairs applicable to number of tasks including next utterance classification and show best result on the Ubuntu dialogue corpus task. 
 
 The techniques we combine in this work are best practices gleaned from the NLP modeling literature. 
-The character trigram histogram technique (Section~\ref{character_level_modeling}) was introduced as word hashing \cite{DBLP:conf/cikm/HuangHGDAH13} to reduce the dimensionality of bag-of-words term vectors. Residual learning (Section~\ref{residual_learning}) was first introduced as a way to ease training of very deep networks in image recognition work \cite{he2015deep}. The technique of attention aggregation (Section~\ref{attention_aggregation} has been effectively used for several language based tasks like neural machine translation \cite{DBLP:journals/corr/BahdanauCB14}, \cite{DBLP:conf/emnlp/LuongPM15}, question answering \cite{} and others. More specifically in dialogue modeling, \cite{DBLP:journals/corr/YaoPZW16} have shown that attending to the context while generating the words of the response, similar to attention based model used for MT, gives an improvement over using just the last hidden state.
+The character trigram histogram technique (Section~\ref{character_level_modeling}) was introduced as word hashing \cite{huang2013learning} to reduce the dimensionality of bag-of-words term vectors. The technique of attention aggregation (Section~\ref{attention_aggregation} has been effectively used for several language based tasks like neural machine translation \cite{bahdanau2014neural}, \cite{luong2015effective}, question answering \cite{} and others. More specifically in dialogue modeling, \cite{yao2016attentional} have shown that attending to the context while generating the words of the response, similar to attention based model used for MT, gives an improvement over using just the last hidden state.
 
 
 \newpage
@@ -311,7 +317,6 @@ The modeling question then is how to model:
 \item the utility/completeness function $\U(p+a)$.
 \end{enumerate}
 In our work, both will be represented using neural networks over the appropriate inputs. Posts, questions and answers will all be represented as embeddings. We train the parameters of the two models jointly to minimize a joint loss defined such that an answer that has a higher potential of increasing the utility of a post gets a higher probability.
-
 
 Figure~\ref{model} describes the behavior of our model during test time. 
 Given a post $p$, our first step is to generate a set of candidate questions and a set of candidate answers (Section~\ref{question_candidate_generator}).
@@ -865,7 +870,7 @@ Our main result shows that although our bronze standard labels are noisy (Sectio
 
 \newpage
 
-\chapter{Generating next response during two-way conversation}\label{dialogue_next_response}
+\chapter{Selecting next response during two-way conversation}\label{dialogue_next_response}
 
 \section{Introduction}
 
@@ -933,12 +938,11 @@ Conversation between two people proceeds via utterances such that each utterance
 
 \subsection{Bursty Vocabulary}\label{bursty_vocabulary}
 
-Models that use vector representations for words often define the vocabulary using a cut-off on the frequencies of words in the entire corpus, replacing all lower frequency words with a special out-of-vocabulary token. As is typical with power law statistics, there are a large number of infrequently occurring tokens in the Ubuntu Dialogue corpus. %, e.g., due to misspellings and incorrect tokenization.  Cross validation indicates the optimal frequency cutoff for this dataset is actually quite high, e.g., including tokens with a total count below 20 leads to overfitting. 
-However, these rare terms include tokens that are only used in a few conversations, but which occur at a high frequency within these conversations.  Intuitively this could correspond to rare entities that are the topic of a few conversations, and which would be  highly discriminative for next utterance classification. %To safely induce a dedicated one-hot representation for such tokens while avoiding overfitting, 
-To upweight such words, we define the following notion of a bursty vocabulary: the frequency of a word is defined by its count in the conversation where it occurs the most and a vocabulary is thereafter defined using a cut-off on these word frequencies.  Experimentally this simple approach is surprisingly effective.
+Models that use vector representations for words often define the vocabulary using a cut-off on the frequencies of words in the entire corpus, replacing all lower frequency words with a special out-of-vocabulary token. As is typical with power law statistics, there are a large number of infrequently occurring tokens in the Ubuntu Dialogue corpus e.g., due to misspellings and incorrect tokenization.  Cross validation indicates the optimal frequency cutoff for this dataset is actually quite high, e.g., including tokens with a total count below 20 leads to overfitting. 
+However, these rare terms include tokens that are only used in a few conversations, but which occur at a high frequency within these conversations.  Intuitively this could correspond to rare entities that are the topic of a few conversations, and which would be  highly discriminative for next utterance classification. To upweight such words, we define the following notion of a bursty vocabulary: the frequency of a word is defined by its count in the conversation where it occurs the most and a vocabulary is thereafter defined using a cut-off on these word frequencies.  Experimentally this simple approach is surprisingly effective.
 
 To understand the idea of bursty vocabulary better, we inspect words from our corpus that were included in the bursty vocabulary and excluded in the regular vocabulary and vice-versa. We call them bursty non-frequent words and frequent non-bursty words respectively. Some examples of bursty non-frequent words are \textit{`multicasting', `techsupport',} and  \textit{`mutex'}; suggesting bursty words are rare topic words. We find that 32\% of the words in our bursty vocabulary fall out of our regular vocabulary.
-%When we looked at the conversations where these words occurred the most we found that they corresponded to conversations where the speakers were talking about an issue with say multicasting, techsupport or mutex; these words were likely to occur in the true next utterance but not in the distractor utterances.
+When we looked at the conversations where these words occurred the most we found that they corresponded to conversations where the speakers were talking about an issue with say multicasting, techsupport or mutex; these words were likely to occur in the true next utterance but not in the distractor utterances.
 Some examples of frequent non-bursty words are \textit{`insulting', `accurate'} and \textit{`baggage'}; suggesting that frequent words may not correspond to topic words, and therefore may be less useful for identifying the true next response. We find that 57\% of our regular vocabulary are non-bursty words.
 
 \begin{figure}
@@ -963,9 +967,9 @@ Model & TF-IDF & RNN & LSTM & +Attn & +Hierar & +Bursty & +TrigHist & RNN-CNN \\
 \subsection{Character Trigram Histogram} \label{character_trigram_histogram}
 
 
-Most modeling of text for various natural language processing tasks have been done at the word level. Recent work in neural machine translation has seen the benefit of modeling at a sub-word level. This can be especially useful for natural dialog due to phenomena such as misspellings, elided white spaces, and abbreviation. We found character trigram histograms to be simple and highly effective. Figure \ref{fig:trigram_histogram} shows a sample trigram histogram of the word \textit{bananas}. The left column lists all the trigrams in the word and their frequencies.  Associated with each trigram is an index: a trigram which occurs sufficiently frequently in the training corpus is assigned a unique index, and all other trigrams are assigned the special out-of-trigram index. The trigram histogram for each word is then defined as a frequency vector of size of the trigram vocabulary.  %This defines a trigram frequency vector for any token. 
+Most modeling of text for various natural language processing tasks have been done at the word level. Recent work in neural machine translation has seen the benefit of modeling at a sub-word level. This can be especially useful for natural dialog due to phenomena such as misspellings, elided white spaces, and abbreviation. We found character trigram histograms to be simple and highly effective. Figure \ref{fig:trigram_histogram} shows a sample trigram histogram of the word \textit{bananas}. The left column lists all the trigrams in the word and their frequencies.  Associated with each trigram is an index: a trigram which occurs sufficiently frequently in the training corpus is assigned a unique index, and all other trigrams are assigned the special out-of-trigram index. The trigram histogram for each word is then defined as a frequency vector of size of the trigram vocabulary.  
 We reduce the dimensionality of the trigram histogram vector using Principal component analysis (PCA) \cite{tipping1999probabilistic} and concatenate it with the word embedding to get our final word representation. The representations of two words that have small edit distance will have larger inner product, thus facilitating statistical transfer between them.
-%This yields two interesting properties.  First, the representations for two tail tokens that have small edit distance will have larger inner product than if the edit distance were large, facilitating statistical transfer between tail terms of low edit distance.  Second, the use of dropout on the input variables will facilitate statistical transfer between head terms and tail terms with small edit distance, as the one-hot portion of the representation will sometimes be dropped out.
+This yields two interesting properties.  First, the representations for two tail tokens that have small edit distance will have larger inner product than if the edit distance were large, facilitating statistical transfer between tail terms of low edit distance.  Second, the use of dropout on the input variables will facilitate statistical transfer between head terms and tail terms with small edit distance, as the one-hot portion of the representation will sometimes be dropped out.
 
 \section{Experiments and Results}\label{ubuntu_experiments_results}
 
@@ -1000,7 +1004,8 @@ Although our methods have been inspired by the atypical word usage in dialogues,
 
 \section{Template based question generation}
 
-In our preliminary work, we focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To make the system more general, it needs to be able to generalize to unseen context well. For e.g. consider a scenario in which the post is talking about the application `apt-get' that the model has never seen in its past before. However, from the context, it can make out that the discussion is similar to a different discussion where the topic was the application `yum' and a plausible clarification question is asking for the version of the application. However, since it has not seen a clarification question like ``What version of yum are you using?'', it fails to generate one. To circumvent this generalization issue, we propose template based question generation method. For instance, consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We enumerate four steps of our template based question generation method:
+In our preliminary work, we focused on the question selection problem i.e. select the right clarification question from a set of prior questions. To make the system more general, it needs to be able to generalize to unseen context well. For e.g. consider a scenario in which the post is talking about the application `apt-get' that the model has never seen in its past before. However, from the context, it can make out that the discussion is similar to a different discussion where the topic was the application `yum' and a plausible clarification question is asking for the version of the application. However, since it has not seen a clarification question like ``What version of yum are you using?'', it fails to generate one. To circumvent this generalization issue, we propose a template based question generation method. For instance, consider a template like ``What version of \_\_\_  are you running?''. This template can generate thousands of specific variants found in the data like ``What version of Ubuntu are you running?'', ``What version of OS are you running?'', ``What version of apt-get are you running?'', etc. We enumerate four steps of our template based question generation method:
+
 \begin{enumerate}
 \item Identify groups of similar questions from a huge collection of questions.
 \item Generate a template for each group of questions.
@@ -1008,23 +1013,58 @@ In our preliminary work, we focused on the question selection problem i.e. selec
 \item Fill in the variables in the template using words relevant to the given post.
 \end{enumerate}
 
-For grouping similar questions together, we plan to explore some of the clustering algorithms which cluster documents based on their lexical and semantic similarity. A preliminary experiment of trying to cluster questions has revealed that the questions are too different from each other to form useful clusters. We therefore propose a different strategy in which we will remove topic specific words from the questions and then cluster them, thus forcing a generalization before grouping them. To generate templates corresponding to each cluster, we plan to further identify topic specific words from the question using syntactic information (like parts-of-speech tags) and then remove them to form generic templates. In the third step, given a post and a set of candidate question templates, we will select a template using a model similar to our preliminary work. Finally, in the fourth step, we plan to explore methods similar to slot filling approaches \cite{} to populate the blanks in the template with post specific words.
-
+\noindent
+For grouping similar questions together, we plan to explore some of the clustering algorithms which cluster documents based on their lexical and semantic similarity. A preliminary experiment of trying to cluster questions has revealed that the questions are too different from each other to form useful clusters. We therefore propose a different strategy in which we will remove topic specific words from the questions and then cluster them, thus forcing a generalization before grouping them. To generate templates corresponding to each cluster, we plan to further identify topic specific words from the question using syntactic information (like parts-of-speech tags) and then remove them to form generic templates. In the third step, given a post and a set of candidate question templates, we will select a template using a model similar to our clarification question selection model described in our preliminary work in Chapter~\ref{stackexchange}. Finally, in the fourth step, we will fill in the blanks in the template with topic specific words from the post. We plan to first generate a candidate set of topic words from the post and then train a machine learning model which given the context of the post and the question template would select the correct topic word from the candidate set of topic words.
+%plan to explore methods similar to slot filling approaches \cite{} to populate the blanks in the template with post specific words.
+ 
 \newpage
 \section{Sequence-to-sequence based question generation}
 
 Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation (Sutskever et.al. 2014), dialog generation (Serban, Iulian V., et al. 2016), etc. The main idea behind these models is that they work on an encoder-decoder framework. The encoder model takes in the words of the input one word at a time, passes it through a recurrent neural network (or its variants like LSTM, GRU, etc) and generates a final vector representation of the input. The decoder, then, takes in this input representation and a start symbol and generates the words of the output one word at a time till it generates the end of sequence symbol. The model is trained using a large number of input/output sequences to minimize the perplexity between the generated output sequence and the true output sequence.\\
 
 \noindent
-On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model (Yin, Jun, et al.  2016) built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post. Using this approach we thus incorporate the template based question generation method into a more general neural network framework.
+On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model \cite{yin2016neural} built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post. Using this approach we thus incorporate the template based question generation method into a more general neural network framework.
 
 \section{Clarification questions for dialog systems}
 
-In our preliminary work we developed a model for generating a clarification question in a non-interactive setting i.e. after someone has described their problem in its entirety, we ask a question. However, most of such problem solving happens in the form of a dialog between a system and a human. In our next research direction, we propose to build a model that learns to generate  clarification questions at different stages of an ongoing conversation. Our model will learn the trade-off between asking a generic question at the initial stages and asking a specific question at the later stages of a conversation. We will evaluate our model using the Ubuntu Dialogue corpus, a large corpus recently put together by Lowe, Ryan, et al. (2015) by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system.
+In our preliminary work we developed a model for generating a clarification question in a non-interactive setting i.e. after someone has described their problem in its entirety, we ask a question. However, most of such problem solving happens in the form of a dialog between a system and a human. In our next research direction, we propose to build a model that learns to generate  clarification questions at different stages of an ongoing conversation. Our model will learn the trade-off between asking a generic question at the initial stages and asking a specific question at the later stages of a conversation. We will define a cost function that measures the worth of asking a question at an early stage versus at a later stage. \\
+
+\noindent
+For the dataset, we plan to use the Ubuntu Dialogue corpus, a large corpus recently put together by \cite{lowe2015ubuntu} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work (Chapter~\ref{dialogue_next_response}), we defined a model that selects the next best response given the context of a conversation. We find that, given the problem solving domain of these chats, many of these responses are questions. Therefore, we plan to define our task as, given the context of a conversation, decide whether there is value in generating a clarification question as the next response and if there is some value, ask the question. We will use different lengths of context of a single conversation to compare the value of generating a clarification question early on in a conversation with little context and the value of waiting and generating a clarification question later on in the conversation with more context. 
+
+\newpage
+\section{Identifying missing information using knowledge bases}
+
+In the approaches described so far, the models learn to ask a clarification question by looking at previously asked questions in a similar context. More specifically, we rely on our data to include the kinds of questions that we would like to ask. The main purpose of generating the clarification questions is to identify the missing information in a given text. To understand what is missing, one needs to first know what should have been there. As humans, we rely on our prior knowledge about the subject to decide what should have been there but is missing and then ask a clarification question pointing out the missing information. \\
+
+\noindent
+Therefore, in our last proposed work, we propose to develop a model which extracts information from knowledge sources like Wikipedia and makes use of it to generate clarification question. Sites like academia, music, mythology, etc on StackExchange contain discussions which require domain knowledge readily available on Wikipedia. We propose the following four-step approach to our knowledge base induced clarification question generator:
+\begin{enumerate}
+\item Given a post on StackExchange, we will first extract a Wikipedia page that is most relevant to the given post.
+\item In the second step, we will use the structured information on the Wikipedia page to extract the attributes of the topic of discussion in the post. For instance, in the domain of music, the topic "song" would contains attributes like singer, genre, album, etc.
+\item In the third step, we develop a method to identify which of the attributes extracted in the previous step are currently missing in the given post.
+\item Finally, in the fourth step, we will generate a question that would ask about the missing attribute identified in the previous step.
+\end{enumerate}
+
 
 \newpage
 
 \chapter{Conclusion and Timeline}\label{conclusion}
+
+In this proposal, we identify that the problem of generating clarification questions is a problem worth of study, both in its own right and as part of the larger problem of building naturalistic conversational systems. To our knowledge, this is the first time a work has focused solely on generating clarification questions. We present our preliminary work on generating clarification questions on StackExchange posts and propose methods to generalize this approach further to new contexts. We present our work on dialogue focus tracking and its application on the task of zero-pronoun resolution. We present our preliminary work on identifying the next best response given the context of a conversation and propose methods to specifically generate clarification questions in the context of dialogues. Finally, we propose a novel method that makes use of external knowledge bases to identify missing information before it generates a question, thus bridging the gap between pure corpus driven approaches and pure knowledge base driven approaches for question generation. 
+
+\section{Timeline}
+
+The timeline for my proposed work is as follows:
+\begin{itemize}
+\item 2017-05: Proposal
+\item 2017-09: Template based question generation
+\item 2017-11: Sequence to sequence based question generation
+\item 2018-01: Clarification questions for dialogues
+\item 2018-04: Identifying missing information using knowledge bases
+\item 2018-06: Thesis
+\item 2018-07: Defense
+\end{itemize}
 
 \begin{small}
 \bibliographystyle{acl_natbib}
