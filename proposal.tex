@@ -9,6 +9,8 @@
 \usepackage{amsfonts}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
+\newcommand*{\checktikz}[1][]{\tikz[x=1em, y=1em]\fill[#1] (0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+
 \newcommand{\Correct}{\checktikz[draw=black]}
 \newcommand{\ValidMiss}{\checktikz[draw=gray,fill=white]}
 \newcommand{\Valid}{\checktikz[draw=gray,fill=white]}
@@ -173,10 +175,13 @@ In both the research agendas described so far, I took a purely corpus-driven app
 
 \section{Motivation}
 
-An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. According to Gricean pragmatics \cite{grice1975logic}, speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. In case of gaps or mismatches in knowledge, the listener resorts to asking questions. With the advancements of artificial intelligence technologies, we increasingly find ourselves interacting with automated agents (like Apple's Siri, Amazon's Alexa, Google Home, etc) in naturally spoken languages. If we wish to make such human-bot interactions as efficient as human-human interactions are, it is important that we teach machines to ask clarification questions when faced with uncertainty or knowledge gaps.\\
+An overarching goal of the natural language processing community is to develop techniques that would enable machines to process naturally occurring text as efficiently as humans do. However, as humans, we do not always understand each other. In pragmatics, Grice's theory of conversational implicatures \cite{grice1975logic} says that there is a difference between what someone says and what someone `implicates' by uttering a sentence. What someone says is determined by the conventional meaning of the sentence uttered and contextual processes of disambiguation; what she implicates is associated with the existence of some rational principles and maxims governing conversation. The Gricean maxims of conversation says that speakers and listeners adhere to a Cooperative Principle where a speaker communicates information that is as informative as required and not more. The speaker assumes a certain common ground or mutual information or shared knowledge with the listener \cite{clark1991grounding,clark1982hearers,clark1981definite}. In case of gaps or mismatches in knowledge, the listener resorts to asking questions. Correction of such knowledge deficits has been identified as one of the key purposes of asking questions \cite{graesser2008question}. \\
 
 \noindent
-In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty or knowledge gaps. \cite{graesser2008question} identify that one of the key purposes of asking questions is the correction of such knowledge deficits.
+With the advancements of artificial intelligence technologies, automated agents like Apple's Siri, Amazon's Alexa, Google Assistant, etc are becoming increasingly common in our day-to-day lives. We might use these agents to say set up an alarm, check for the weather OR schedule a meeting. However, many-a-times these agents fail to understand what we tell them presumably due to a mismatch in the common knowledge we assume with them. If we wish to make such human-bot interactions as efficient as human-human interactions are, it is important that we teach machines to ask clarification questions when faced with uncertainty or knowledge gaps.\\
+
+\noindent
+In the field of natural language processing, however, despite decades of work on question answering, there has been little work in question asking. Moreover most of the previous work on generating questions has been on generating reading comprehension style questions: given a text, write a question that one might find on a standardized test assessing the knowledge of a student about a particular topic in the text. Comprehension questions, by definition, are answerable from the provided text. Clarification questions are not. The goal of this thesis work is to explore how can a machine automatically generate clarification questions when faced with uncertainty or knowledge gaps. 
 
 \section{Research questions}
 
@@ -207,7 +212,7 @@ Finally, in our last proposed work, we plan to explore how can we make use of ex
 \section{Organization}
 
 Chapter~\ref{background} presents a review of the current methods for question generation, a review of the neural network models used in natural language processing tasks and finally a review of the current methods for dialogue modeling. 
-Chapter~\ref{stackexchange} describes our preliminary work on generating clarification questions for posts on StackExchange. Chapter~\ref{dialogue_focus_tracking} describes our work on zero-pronoun resolution in the context of dialogues where we develop a model to track the focus shift and show that using this information gives us significant improvement on the task of zero-pronoun resolution over current approaches. Chapter~\ref{dialogue_next_response} describes our preliminary work on dialogue modeling where we develop a neural network model for generating next response given the context of a conversation. Chaper~\ref{proposed_work} describes our three proposed work extending our preliminary work on clarification question generation. Chaper~\ref{conclusion} concludes our proposal and describes a timeline for our remaining proposed works.
+Chapter~\ref{stackexchange} describes our preliminary work on generating clarification questions for posts on StackExchange. Chapter~\ref{dialogue_next_response} describes our preliminary work on dialogue modeling where we develop a neural network model for generating next response given the context of a conversation. Chaper~\ref{proposed_work} describes our three proposed work extending our preliminary work on clarification question generation. Chaper~\ref{conclusion} concludes our proposal and describes a timeline for our remaining proposed works.
 
 \newpage
 
@@ -233,7 +238,7 @@ Recently, \cite{lowe2015ubuntu} introduced a large Ubuntu Dataset Corpus by syst
 
 \newpage
 
-\chapter{Generating clarification questions on StackExchange posts}\label{stackexchange}
+\chapter{Clarification Questions for Question-Answering Forums}\label{stackexchange}
 
 \section{Introduction}\label{introduction}
 
@@ -537,6 +542,141 @@ In the data, 56\% of the examples had at most four options marked as valid;
 28\% had at most 3; 14\% had at most 2; and 6\% had only one valid option (which by definition is also the ``best'' option).
 These numbers suggest that an evaluation strategy that takes validity---and not just raw accuracy---is a useful avenue for future research.
 
+\subsection{Example Outputs}
+
+To understand the behavior of the model, we have included five example outputs as supplementary material.
+Table~\ref{tab:examples_good} shows two examples in which our model succeeds in selecting the correct question.
+In the first, the original poster is asking a question about SSD data and hardware.
+The model correctly asks about uefi (the Unified Extensible Firmware Interface, which replaces BIOS), and ranks that output significantly higher than its second guess.
+This is particularly impressive since the question mentions neither uefi nor bios. Human annotators said that the third and fifth outputs would also be valid. In the second example, a user is having significant difficulty getting their Ubuntu installation to work, and the model correctly asks about the error of \texttt{\small apt-get install}.
+Several other options were marked as valid by annotators in this case as well.
+
+Table~\ref{tab:examples_bad} shows three examples of errors.
+In the first example (about sound), the model
+completely misses (ranks in last place) the true question about \texttt{\small linux-firmware-nonfree}.
+The model instead asks about Pulseaudio, considered a valid question by annotators.
+In the second example, the truth is about \texttt{\small apt-get update} but the model instead asked for the ubuntu version (generally a safe bet, and considered valid). %In this case the model fared better and put the correct question in second position.
+In the third example, the model asks far too specific a question about \texttt{\small sslstrip-0.9.tar.gz}, rather than the more debugging question which it should have asked about (in position two).
+In this case, it's guess was invalid.
+
+\begin{table*}
+\footnotesize
+\centering
+\begin{tabular}{rp{15cm}}
+\toprule
+\textbf{Title:} &
+\textbf{SSD + HDD with Ubuntu} \\
+\textbf{Post:} &
+I have buy new computer with SSD 128 GB and HDD 750 GB and i'd like to install Ubuntu 13.10 O.S., hardware drivers and programs that i will use more often on the SSD and data on the HDD Disk (film, video, photo.. Etc ..). It makes sense? How can I do? Thanks\\
+\midrule
+\Correct 0.84 &	is computer uefi and do you want uefi or bios ? \\
+0.58	& `` some people writes that its not good idea to install system on ssd '' , who writes such nonsense ? \\
+\ValidMiss  0.55 & what is the make and model number of your computer ? \\
+0.54 & possibly relevant [ what should i know about ssds that can be used with ubuntu ? \\
+\ValidMiss 0.47 & what exactly is the problem ? \\
+0.45 & is windows 10 going to use the hard drive or ssd ? \\
+0.20 & you seem to have 195gb free on disk 0. why not use them ? \\
+0.17 & is windows in uefi or bios boot mode ? \\
+0.07 & it looks like a standard uefi install . you only show 214mb used on sda1 ? \\
+0.05 & so you cloned the original hdd to another drive , then to an image file , then the image file to a third drive ? \\
+\toprule
+\textbf{Title:} & \textbf{How do i get ubuntu 15.10 to show the desktop verison.} \\
+\textbf{Post:} & 
+Ok so this is just one of my problems. I downloaded and installed Ubuntu 15.10 along side windows 8.1. Everything was fine and working then I booted my computer and it goes to terminal asks for login and then password and then something like this pops up on black screen \texttt{\small tammy@tammy 1629 \$\~} so I'm assuming its like a dos. I get nowhere fast. So I go and look up Linux commands and try to work it out. I can't get to the desktop version, I can't get apt-get to work, because everything I want to do says I need to install it via apt-get, things that are installed I can't access because they are locked, or could not be parsed or opened. I cannot even use my USB ports, DVD, nothing so installing it again won't work. I can not even get back into window 8.1 because I don't see the partition to know where it is. So what I have here is a screen and a bunch of headaches and just when I think I can solve one of them, it leads me into another problem ie.... Apt-get install ??? Says can't find file or it can't write to it cause its locked or its a read only or could not be parsed or open or exited with return code 1. I have so many errors, so really do t know where to start. \\
+\midrule
+\Correct 0.72 & maybe your system was mounted read-only. could you provide more information about the error of ``apt-get install''? \\
+0.55 & how did you format your usb drive ? \\
+0.42 & if i understood right , your home folder is encrypted ? \\
+0.36 & did you find any information about how to solve this issue ? \\
+\ValidMiss 0.31 & could you try re-running `sudo dpkg-reconfigure -a` , and getting the errors ? \\
+\ValidMiss 0.31 & were there any error messages when you installed the driver ? \\
+0.28 & and 'du -c ' in home gives only a total of 1.1 tb . where is the rest taking up space ? \\
+0.26 & i 'm confused , is the `` locked out of my account '' relevant ? \\
+\ValidMiss 0.17 & can you post the contents of your sources.list file for further investigation ? \\
+\ValidMiss 0.09 & what happens exactly with the grub method ? \\
+\bottomrule
+\end{tabular}
+\caption{Two examples on which our system produces the correct question. The questions are sorted by expected utility, given in the first column. The correct answer is marked \Correct and answers additionally annotated as valid are marked \Valid.}
+\label{tab:examples_good}
+\end{table*}
+
+\begin{table*}
+\footnotesize
+\centering
+\begin{tabular}{rp{15cm}}
+\toprule
+\textbf{Title:} & \textbf{Kubuntu 15.10 laptop no sound} \\
+\textbf{Post:} & 
+I just installed kubuntu 15.10 on my laptop (spectre x360) and I'm having trouble with the sound. No sound is played through the speakers nor the headphones. It seems a number of people have/had the same problem on the HP forum: http://h30434.www3.hp.com/t5/Notebook-PC-Sound-and-Audio/HP-spectre-x360-on-linux/td-p/4980797
+
+Most people report being able to get it to work using the method posted, but for a few people the upgrade to 15.10 stopped sound from working again. I posted over there, but maybe people here might have some insights into the problem as well
+
+Strangely, when I go into settings $>$ audio and video, I can select the sound device, hit test and sound plays no problem. It just doesn't work for anything else on the system
+
+Were there any major changes from 15.04 $>$ 15.10 that renders the grub fix useless? What are my options for getting sound to work?
+\\
+\midrule
+\Valid 0.57 & have you tried using pulseaudio yet ? \\
+0.50 & i have not experienced this version . i can downgrade easily ? \\
+\ValidMiss 0.42 & have you checked the hardware tab in sound settings ? \\
+\ValidMiss 0.27 & can you have a look on your sound settings $>$ hardware $>$ current profile ? \\
+\ValidMiss 0.22 & quick question : what kind of graphics card are you using ? \\
+0.21 & no , headphones option is not there..what else can be the problem ? \\
+0.19 & this lacks basic information , what is your computer ? \\
+\ValidMiss 0.12 & what 's the output of `lspci -nnk | grep -a2 audio` ? \\
+0.12 & anybody any ideas ? \\
+\Missed 0.12 & i guess you tried the grub option given in your link , but did you install linux-firmware-nonfree package ? \\
+\toprule
+\textbf{Title:} & \textbf{apt-get install does not work properly} \\
+\textbf{Post:} &
+apt-get install command in the terminal does not work and says 
+
+"Reading package lists... Done
+
+Building dependency tree
+
+Reading state information... Done
+
+E: Couldn't find package "
+
+I have tried updating the repositories and even tried changing the sources.list file in etc/apt folder but it still repeats the same.
+\\
+\midrule
+\Valid 0.50 & which ubuntu version are you using ? \\
+\Missed 0.48 & what is the output of `apt-get update` ? \\
+0.45 & what is the output of `apt-cache policy kazam` ? \\
+\ValidMiss 0.45 & have you tried installing it from the software center ? \\
+\ValidMiss 0.32 & what is the result of running `sudo apt-get download gnome-accessibility-themes` ? \\
+0.32 & and why `unable to locate package` ? \\
+\ValidMiss 0.31 & what command have you tried exactly and what was the exact error message ? \\
+\ValidMiss 0.30 & i never knew `foo` was a package . have you tried `sudo apt-get update` ? \\
+0.20 & output is pretty huge . what should i find from there ? \\
+0.16 & did you find `build essential` package on synaptic and software-center ? \\
+\toprule
+\textbf{Title:} & \textbf{How to install from .tar.xz} \\
+\textbf{Post:} &
+I tried to do a normal install, but all i get is 
+
+$>$ tar: Child returned status 2
+
+$>$ tar: Error is not recoverable: exiting now \\
+\midrule
+\Wrong 0.63 & in which folder `sslstrip-0.9.tar.gz` was located ? \\
+\Missed 0.31 & what happens with `tar -- xz -xvf name.tar.xz` ? \\
+0.29 & you have your file in desktop right ? \\
+\ValidMiss 0.25 & did you change directory to where file exist ( i.e . `cd \$ home/downloads` ) ? \\
+0.23 & is this file splitted ? \\
+\ValidMiss 0.22 & can you post the output of `file filename.tar.gz` ? \\
+0.21 & and the filename is exactly as you have it written above ? \\
+0.17 & what directory were you in when you ran sudo ./flash-all.sh ? \\
+\ValidMiss 0.10 & did you inside the folder where tar.gz file is located ? \\
+0.04 & what dependency issues ? \\
+\bottomrule
+\end{tabular}
+\caption{Three examples on which our system produces the an incorrect question. The questions are sorted by expected utility, given in the first column. The predicted (incorrect) answer is always the first (and wrong), the correct (but missed) answer is marked \Missed and valid answers are marked \ValidMiss. In the first two cases, although the model was wrong, it predicted a valid answer. In the last case, it's top selected answer was not valid.}
+\label{tab:examples_bad}
+\end{table*}
+
 \section{Conclusion}
 
 We have described a new dataset for question generation, and attacked this problem from the perspective of question selection.
@@ -547,354 +687,22 @@ The first is in evaluation: given that this task is so difficult for humans, but
 This is exactly the same question faced in much research in dialog and generation more broadly \cite{paek2001empirical,lowe2015ubuntu,liu2016not,kannan2017adversarial}.
 Second, to make question generation more general, systems need to be able to generalize, for instance by constructing templates of the from ``What version of \_\_\_ are you running?'' into which the system would need to fill a variable. Finally, asking question is a natural component of dialog, and building a collaborative dialog system that can naturally converse with a user is a broad long term goal.
 
-\newpage
-
-\chapter{Dialogue focus tracking for zero pronoun resolution}\label{dialogue_focus_tracking}
-
-\section{Introduction}
-
-``Pro-drop'' languages like Chinese, Japanese and Turkish allow for dropping of pronouns when the referents of those pronouns can be inferred. English is typically 
-%\footnote{English requires subject pronouns to be dropped in imperative constructions; and in informal English, subject pronouns are sometimes optional.} 
-\emph{not} pro-drop, but is unusual in that regard: two thirds of languages documented in WALS \cite{wals} can be categorized as pro-drop. In such languages, sentences are frequently characterized by ``zero pronouns'': gaps in the sentence which in English would hold an overt pronoun. In some languages, verbal morphology or clitics elsewhere in the sentence are sufficient to resolve the ambiguity of dropped pronouns; in other languages, there is \emph{no} overt marking at all in the sentence and the referent of the dropped pronoun must be resolved using pragmatic information.
-
-\begin{figure}
-\centering
-\includegraphics[width = .4\textwidth]{mainfig}
-\caption{A conversation between a student and a teacher. The text has been translated from Mandarin, but zero pronouns are retained and indexed with their referent: (T)eacher or (S)tudent.}% Each utterance has a Focus, which is either the (T)eacher, the (S)tudent or (O)ther. These foci can be derived from a true English translation and are either (v)isible (overt in English) or (h)idden (assumed by focus coherence).}
-\label{sms-ex}
-\end{figure}
-
-Our work departs from mainstream work on zero pronoun resolution in that we focus primarily on the resolution of \emph{deictic} zero pronouns. Unlike an \emph{anaphoric} zero pronoun (Section~\ref{ling}), whose reference must occur somewhere previously in the text, a deictic zero pronoun refers to a salient entity in the environment (such as the speaker, hearer or pragmatically accessible referent) without requiring introduction by an overt mention in the text. Although anaphoric zero pronoun resolution has been the focus of most past work \cite{yeh2007zero,chenchinese}, 50\% or fewer of zero pronouns in natural Chinese text are anaphoric \cite{zhao2007identification,kong2010tree}. Figure~\ref{sms-ex} shows an example conversation in which zero pronouns are frequently used to refer to speaker or listener, and would be translated to English as ``I'' or ``you.''
-
-We propose a model for resolving deictic zero pronouns that draws inspiration from ideas in Centering Theory \cite{grosz1995centering}: discourses tend to settle on a particular \emph{focus} for a time, before switching. Furthermore, we presume that \emph{when} a switch happens, there is likely to be an overt cue of this. For example, in Figure~\ref{sms-ex}, the initial focus on \speaker{T} is signaled with the overt second person pronoun in the first utterance; the switch of focus to \speaker{S} in the third utterance is also signaled by an overt ``you.'' However, at that point, the focus remains on \speaker{S} for several utterances until ``The last round\dots'' at which point it switches away from the speakers. It is brought back to \speaker{S} in the last utterance, which can be inferred from the fact that \speaker{S} is the most recent focus that fits the required semantic constraints.
-
-To account for these phenomena, \textbf{we develop a novel sequential model for zero pronoun resolution that explicitly tracks the conversation focus in a dialogue} (Section~\ref{focus_tracking_model}). We test, using data from Chinese SMS (``texting'') dialogues, the hypothesis that our model can predict the identity of pronouns (at a granularity of the person attribute: first, second, or third person---with particular focus on first and second person) based on a variety of features of the utterance context, without reference to a particular antecedent (Section~\ref{efficacy}). In this way, we address a much higher percentage of the zero pronouns found in Chinese texts, and particularly in dialogue.
-
-Our second contribution is to show that \textbf{one can train a zero pronoun resolution system using supervision coming from English translations of the Chinese text} (Section~\ref{taa}). This obviates the need for expensive linguistic annotation of Chinese and allows us to use plentiful parallel data to train our model. Our results confirm that even though this ``translation as annotation'' process is noisy%\footnote{The noise is due to technical issues plus the fact that in informal settings, English \emph{does} allow some subject pronouns to be dropped.}
-, it is still possible to learn on large amounts of ``bronze standard'' data.% than small amounts of ``gold standard'' data (Section~\ref{TODO}).
-
-\section{Linguistic motivation} \label{ling}
-
-Handling zero pronouns in Chinese (or other pro-drop language) involves two separate tasks: (1) Zero pronoun identification: locating and marking the gaps corresponding to zero pronouns; and (2) Zero pronoun resolution: determining the entity referred to by the zero pronoun. Our focus is the latter task.
-
-Zero pronoun resolution, like general pronoun resolution, is almost universally approached as a problem of linking a pronoun to an overt noun phrase antecedent in the text. However, while some zero pronouns do have overt antecedents, many other zero pronouns do not. In fact, \cite{zhao2007identification} report that just 52\% of zero pronouns in their training set (and 46\% of zero pronouns in their test set) are ``anaphoric.'' Kong and Zhou \cite{kong2010tree} report just 41\%. Some zero pronouns fail to link to an antecedent because they refer to facts or events described by larger phrases or full sentences earlier in the text, preventing coreference with a single noun phrase. Other zero pronouns, particularly in dialogue settings, are \emph{deictic}, pointing to salient entities in the environment without requiring introduction by an overt mention in the text.% 
-
-\subsection{Dialogue focus}
-
-A central principle of document cohesion that underlies frameworks such as Centering Theory \cite{grosz1995centering} states that discourses tend to settle on a particular focus for a time, before eventually switching to a new one. The status of a particular focus within this flow of discourse is typically signaled by the form of the expression chosen to point to it. When a focus is introduced (or returned to), a full (overt) noun phrase is generally used to indicate it. While that entity remains in focus, subsequent mentions can be realized with less explicit forms. In English, these less explicit forms are overt pronouns. In Chinese (and pro-drop languages more generally), these focus continuations are generally realized as zero pronouns.
-
-We see in this example an illustration of these discourse principles:
-\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
-\item In pro-drop languages (Chinese), overt pronouns introduce switches in focus, while zero pronouns are used while an established focus continues.
-\item In non-pro-drop languages (English), overt pronouns serve the focus-continuation function.
-\item There are  ``non-anaphoric'' exceptions to these rules, licensed by environmental salience of the referent and inferable from the meaning of the utterance (final question of the example).
-\end{enumerate}
-
-Importantly, these continuations and switches of foci occur for the most part at the level of the syntactic clause. This is thus the level at which we model, assigning labels to individual clauses, which will in turn indicate the identity of any dropped subject pronoun in that clause.\footnote{Although Mandarin does license dropped object pronouns, we focus in this paper only on subject pronouns, as the syntactic subject is (a) more consistently dropped in Mandarin, and (b) more tightly tied to the notion of focus of conversation that motivates our model; see also a discussion of the centering hierarchy in Chinese \cite{chincent}.} In identifying focus, we remain at the granularity of the ``person'' attribute (first, second, or third person). This is the most relevant granularity for deictic pronoun resolution, as the intent is to capture the alternation between speakers within that dialogue (first and second person), along with switches of focus to any referents external to the dialogue (third person). %Number, gender, and animacy attributes are less likely to be captured by sequence labeling. 
-
-
-\begin{table*}[t]
-\begin{center}
-\begin{footnotesize}
-\begin{tabular}{|c|l|p{7cm}|c|}
-\hline
-                  & \bf Original Mandarin & \bf English Translation & \bf Label \\ 
-\hline
-1) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt01.pdf} & How are you, Teacher Chen? & 2v \\
-2) \speaker{Teacher} & \includegraphics[height=0.8em]{conv-utt02.pdf} & I am fine. You have not left yet?  & 1v, 2v\\
-3) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt03.pdf} & I have been back for a month.  & 1v, 1v \\
-                  &                                                & I didn't dare to chat with you. & \\
-4) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt04.pdf} & Not yet.  & 1h \\
-5) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt05.pdf} & I have gone through 4 rounds of interviews for the American (company). & 1v \\
-6) \speaker{Teacher} & \includegraphics[height=0.8em]{conv-utt06.pdf} & Why? & 2h \\
-7) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt07.pdf} & The last round of interview is with the general manager. & 3v \\
-8) \speaker{Student} & \includegraphics[height=0.8em]{conv-utt08.pdf} & There are also two online tests. & 3h \\
-9) \speaker{Teacher} & \includegraphics[height=0.8em]{conv-utt09.pdf} & Are you still in the interview phase? & 2v \\
-\hline
-\end{tabular}
-\end{footnotesize}
-\end{center}
-\caption{Sample Chinese SMS conversation with English translation and derived labels.}
-\label{conv}
-\end{table*}
-
-\subsection{Translation as annotation} \label{taa}
-
-Currently, most state-of-the-art machine learning systems for Chinese zero pronoun resolution are supervised, requiring manually resolved pronouns for training.
-We hypothesize comparable distribution between zero pronouns in a pro-drop language, and overt pronouns in a \emph{non}-pro-drop language. More specifically, because non-pro-drop languages lack zero pronouns, the discourse functions that are served by zero pronouns in pro-drop languages \emph{must} in non-pro-drop languages be served by overt pronouns.
-
-To be more concrete, the original Mandarin SMS conversation from Figure~\ref{sms-ex} is reproduced in Table~\ref{conv}, together with a human translation into English.
-Indeed, we see in the example in Figure~\ref{sms-ex} that the zero pronouns on the Chinese side correspond to overt pronouns on the English side. For this reason we make use of a parallel (Chinese/English) corpus for training of our sequence labeling model, deriving the identities of missing pronouns from the English translation of the Chinese text rather than from coreference relations with antecedents in the Chinese text. Our model thus does not rely on the availability of hand-annotated data for training. 
-
-\section{Our focus tracking model}\label{focus_tracking_model}
-
-Given a Chinese dialogue, our goal is to identify zero pronouns and resolve them either as deictic (first or second person) or anaphoric (third person). We use off-the-shelf tools for the identification of the zero pronouns (described in Section~\ref{setup}) and focus on the \emph{resolution} task.
-
-In our implementation, we \emph{jointly} predict the \emph{focus} and identify the number of the pronoun that would be used. For instance, when \speaker{S} is speaking about herself, we consider this a ``\textbf{1}'' label; when \speaker{S} is speaking about her conversation partner, we consider this a ``\textbf{2}'' label. This numbering corresponds to which pronominal form would be required in English.\footnote{We ignore morphological issues in English dealing with possession and grammatical role, since these are exogenous to the resolution task.}
-
-\subsection{Supervision via bronze standard data} \label{labels}
-
-We obtain ``bronze'' standard (as opposed to ``gold'' standard) data by looking at human-produced English translations of Chinese utterances, such as those seen in Table~\ref{conv}. Our label set consists of two properties: the \emph{person} being referred to (first person, second person or third person), and whether the reference is overt or not (visible or hidden).
-The ``visible'' three labels correspond to clauses in which an overt subject pronoun appears \emph{on the English side.} Chinese clauses bearing this label may have an overt or a zero pronoun subject---if the Chinese side contains a zero pronoun subject, then this label will be used to determine the correct person attribute (first, second, or third) of the unseen pronoun.
-
-\begin{description} \itemsep1pt \parskip0pt \parsep0pt
-\item[1v:] Overt English first person pronoun: ``I'' or ``we''
-\item[2v:] Overt English second person pronoun: ``you''
-\item[3v:] Overt English third person pronoun: ``he'', ``she'', ``it'', ``they'' 
-\end{description}
-
-However, there are plenty of utterances (e.g., 4 and 6) in which the English translation does not contain an overt subject. This can happen in English in imperative constructions, (some) questions, and general informal communication.\footnote{This can also happen due to imperfect zero pronoun identification (Section~\ref{setup}).}
-%Due to a combination of imperfect automatic zero pronoun identification (described below), and subjectivity of Chinese-to-English translation, there are instances in the data in which an empty category has been identified in subject position on the Chinese side, but no overt subject pronoun appears on the English side.
-In these cases, we introduce ``hidden'' person labels whose role is to carry forward the focus from the previous utterance. For instance, in utterance 4, even though there is no subject on the English side, we carry forward the fact that the most-recent referent was ``first person'' and denote this with ``1h.''
-
-Because we are jointly modeling the focus shift and the pronoun realization aspects, when the speaker shifts, the ``hidden'' person must flip. For example, in utterance (5) the \speaker{Student} overtly refers to herself, yielding a label of ``1v.'' The next utterance is by the \speaker{Teacher} but lacks an English subject. The focus remains on the \speaker{Student} and therefore this utterance is labeled ``2h'' meaning that the focus is on the \emph{other} speaker, and it is non-overt in English.
-
-%To deal with such discrepancies, we introduced the following labels (indicated by letter 'h', for 'hidden') to maintain the topic continuity encoded in the Subject continuation feature (explained in more detail in Section~\ref{features}) on the Chinese side, without attempting to link the identified empty category to a pronoun on the English side:
-\begin{description} \itemsep1pt \parskip0pt \parsep0pt
-\item[1h:] subject being continued is first person
-\item[2h:] subject being continued is second person
-\item[3h:] subject being continued is anything else 
-\end{description}
-Finally, we introduced a seventh label for instances in which no overt subject pronoun appears on the English side, and no focus has yet been established from prior clauses (this applies only at the beginning of a discourse). 
-\begin{description} \itemsep1pt \parskip0pt \parsep0pt
-\item[None:] no subject and no focus yet established
-\end{description}
-In Table 1, the rightmost column shows the label assignment for the sample SMS exchange. (The utterances on lines 2 and 3 contain two clauses each, and thus two labels each.)
-
-\subsection{Features}\label{features}
-We included in our model the following features. Note that these features are based solely on the \emph{Chinese side}. Linguistic motivations for each feature category are described.
-%\begin{description} \itemsep1pt \parskip0pt \parsep0pt
-\paragraph{Subject continuation:} a value indicating the \emph{person} (1, 2, 3) of the most recent overt NP that was a direct descendent of an IP node (the most recent overt NP in structural subject position---including, if overt, the subject of the current clause).  \emph{The most recent overt NP subject is a strong candidate for coreference with a zero pronoun. This feature comes closest to attempting antecedent selection.}
-\vspace{-0.5em}
-
-\paragraph{Verb:} the first verb in the VP that is sister to the subject NP (the VP of which that NP is the subject).   \emph{The nature of the verb can provide information relevant to inferring the identity of  deictic forms.}
-\vspace{-0.5em}
-
-\paragraph{Participant index:} a value indicating the index of the conversational participant.   \emph{To capture regularities, in any exist, in the pronoun use of a speaker.}
-\vspace{-0.5em}
-
-\paragraph{Participant switch:} a binary value indicating whether the current utterance represents a change of speaker relative to the previous clause.   \emph{Switches in speaker may, particularly in tandem with other features, be informative about topic.}
-\vspace{-0.5em}
-
-\paragraph{Object (downstream):} the direct object of the VP sister to the subject (if any).   \emph{This feature exploits the fact that pronouns occurring as direct objects within a clause cannot be the same as the (zero) pronoun in subject position of that clause.}
-\vspace{-0.5em}
-
-\paragraph{Has question particle:} a binary value indicating whether the clause contains a) a question particle or \emph{wh}-word, or b) a question mark.   \emph{This feature is likely to be a strong indicator of that the subject pronoun is \emph{not} first person (also used by \cite{chen2013chinese}).}
-\vspace{-0.5em}
-
-\paragraph{Bag of words:} all words occurring in the clause.   \emph{Apart from the verb, other words can also be highly informative about the nature of the subject.}
-\vspace{-0.5em}
-
-\paragraph{Bag of parts of speech:} all parts of speech occurring in the clause.   \emph{the structural make-up of clause may be informative about focus, for instance in the case of passive or possessive constructions.}
-\vspace{-0.5em}
-
-\paragraph{Hidden subject particles:} a feature indicating whether the clause consists of a list of phrases consistently tagged with empty categories on the Chinese side, but consistently translated without subjects pronouns on the English side (thus likely to correspond to labels 4-6).   \emph{This feature is intended to help the model in recognizing clauses consistently corresponding to ``hidden'' labels.}
-%\end{description}
-
-In addition for the features that consist of sequence (bag of words, bag of part of speech, object, etc.) we additionally compute bigrams and trigrams.
-
-\subsection{Structured prediction}
-
-We cast the above model as a sequence labeling problem over visible and hidden labels. We consider each conversation segment in the SMS as an input data sequence $\vec x = \langle x_1, x_2, \dots, x_n\rangle$ where each $x_i$ corresponds to a clause in Chinese. Each clause in Chinese is assigned a label from the label space $Y$ = \{1v, 2v, 3v, 1h, 2h, 3h, none\}. The task then is to assign labels $\vec y = \langle y_1, y_2, \dots, y_n\rangle$ to the input data sequence from the label space $Y$ based on the features described in Section ~\ref{features}. At training time we assign labels to the input sequence using the ``bronze standard'' method described in Section~\ref{labels}.
-
-To train the sequence labeling model, we use an online variant of the DAgger imitation learning algorithm \cite{ross11dagger} as implemented in the Vowpal Wabbit machine learning library \cite{langford2007vowpal,daume2014efficient}. DAgger, like its predecessor \textsc{Searn} \cite{daume2009search}, solves structured prediction problems by transforming them into sequential decision making problems. In the case of sequence labeling, the natural order for sequence decision making is left-to-right. At test time, inference is performed greedily. At training time, the learning algorithm attempts to balance between training on ``oracle'' states (prefixes of decisions made optimally according to the true labels) and training on ``system'' states (prefixes of decisions made sub-optimally according to the learned model). The online variant of DAgger balances this trade-off by slowly transitioning from making past decisions optimally to making them using the currently learned predictor.
-
-\section{Experiments} \label{focus_tracking_experiments}
-
-Our goal in our experiments is to answer the following questions:
-
-\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
-\item How well does the bronze-standard annotation capture the underlying truth? (Section~\ref{gold}).
-\item Is our model able to leverage both dialogue structure and semantic content to accurately resolve pronouns? (Section~\ref{efficacy})
-%\item Is ample bronze data more or less useful than meager gold data? (Section~\ref{loo})
-\item How important are the different components in our model in making effective predictoins? (Section~\ref{ablation})
-\end{enumerate}
-
-In the following sections, we describe the experiments we perform aimed at answering these questions. First, we describe the data we use for experimentation.
-
-\subsection{Experimental setup} \label{setup}
-
-\begin{table}[t]
-\begin{footnotesize}
-\begin{center}
-\begin{tabular}{|l|r|r|r|}
-\hline
-&
-\multicolumn{1}{c|}{\bf Bronze} &
-\multicolumn{1}{c|}{\bf SMS} &
-\multicolumn{1}{c|}{\bf OntoNotes} \\
-&
-\multicolumn{1}{c|}{\bf Training} &
-\multicolumn{1}{c|}{\bf Test} &
-\multicolumn{1}{c|}{\bf Test} \\
-\hline
-\bf \# tokens & $1,007,722$ & $8104$ & $108,531$ \\ \hline
-\bf \# sents  & $129,190$ & $1152$ & $9607$ \\ \hline
-\bf \# dialog & $3309$ & $34$ & $257$ \\ \hline
-\bf \# types  & $26,519$ & $1747$ & $4753$ \\ \hline
-\end{tabular}
-\end{center}
-\end{footnotesize}
-\caption{\label{dataset-numbers} Dataset statistics; numbers are for the Chinese side of the data. English has $25\%$ more tokens and roughly as many types.}
-\end{table}
-
-For training our focus-tracking model, we use Chinese-English parallel data from the SMS/chat domain available as part of training data used in the Machine Translation task under the BOLT project. The training data consisted of $117k$ sentences. We test our model on heldout SMS/Chat data consisting of $1152$ sentences, and on telephone conversation data from the OntoNotes corpus \cite{hovy2006ontonotes}, consisting of $5000$ sentences. Full data statistics are provided in Table~\ref{dataset-numbers}.
-
-We perform zero pronoun identification using the method of \cite{cai2011language}, which automatically recovers empty categories corresponding to dropped pronouns, integrating these empty categories into syntactic parses. Syntactic parses were obtained with the Berkeley parser \cite{petrov2007improved}. These parses were then used to split the Chinese utterances into single-clause units, based on IP and CP clausal nodes. These clauses were aligned with clauses in the English translation, which were used to determine the identity of the clausal subject, for extracting the 1v,2v,\dots label for each utterance.\footnote{Sometimes English syntactic parses were not well-aligned with the Chinese IP/CP nodes; in practice, we split the English utterances based on end-of-clause punctuation and aligned Chinese and English clauses based on a simple order heuristic.}
-
-For our machine learning systems, we use Vowpal Wabbit \cite{langford2007vowpal} with default hyperparameter settings. We train on $75\%$ of the trainind data and retain $25\%$ as development data on which to perform early stopping. We run 20 iterations by default and take the parameters with best development performance based on sequence labeling accuracy.
-
-\subsection{Gold standard test set} \label{gold}
-
-Although we can use ``bronze standard'' annotations for learning, evaluating against a bronze standard is not directly useful. Therefore, we annotated our test set ($1152$ utterances) by hand. In particular, for the SMS/chat test set, we recruited three linguistically-informed native Mandarin speakers to annotate Chinese clauses containing empty categories. The clauses were labeled with a person number (1,2,3) when the empty category corresponded to such a pronoun; or ``none'' in spurious cases.
-
-In our annotated data\footnote{Annotations will be made freely available.}, $32\%$ of identified zero pronouns were first person, $17\%$ were second person, $25\%$ were third person and $26\%$ do not have a referent (were spurious). Of the correctly identified zero pronouns, a majority of pronouns (about 2/3) are deictic: referring either to the speaker or listener. The remainder are third person and mostly\footnote{In an in-person dialogue, a third person pronoun might be used in a deictic manner, as in ``\emph{She} is really smart'' while pointing at someone. This rarely occurs in SMS/chat because there is no shared environment beyond the two dialogue participants.} anaphoric.
-
-\begin{table}
-\begin{footnotesize}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline \bf Pronoun & \bf Precision & \bf Recall & \bf F-measure \\ \hline 
-\bf 1p & 0.75 & 0.43 & 0.55 \\ \hline
-\bf 2p & 0.61 & 0.32 & 0.42 \\ \hline
-\bf 3p & 0.52 & 0.45 & 0.49 \\ \hline
-\bf Micro-avg & 0.62 & 0.41 & 0.50 \\ \hline
-\end{tabular}
-\end{center}
-\end{footnotesize}
-\caption{\label{bronze-vs-gold} Bronze vs Gold labels}
-\end{table}
-
-We then used these annotations to evaluate our bronze standard label assignment method against the gold standard judgments. Table~\ref{bronze-vs-gold} shows the precision, recall and F-measure of the bronze annotations when evaluated against the gold annotations. We can see a fairly significant discrepancy between our bronze labels and the gold labels. One major---and unfortunately inevitable---reason for this discrepancy is a high proportion of utterances in the English translation data which have been translated with the subject pronouns still absent. This is partially due to the casual nature of the text, and partially because the quality (fluency) of English translations in this data is at times dubious.
-
-While there may be a systematicity to this kind of subject omission on the English side, this was not a factor taken into account by our human annotators. So while our own model may stand a chance at predicting ``hidden'' labels (no overt pronoun on English side) in such instances, the annotators will never assign a label of ``4'' to a location at which a pronoun could reasonably have been inserted.
-
-\begin{table*}[t]
-\begin{footnotesize}
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|}
-\hline
-\multicolumn{7}{|c|}{\bf Subject Continuation Baseline} \\
-\multicolumn{1}{|c|}{} & 
-\multicolumn{3}{|c|}{\bf SMS Test set} & 
-\multicolumn{3}{|c|}{\bf OntoNotes Test set} \\
-\hline 
-\bf Pronoun & \bf Precision & \bf Recall & \bf F-measure & \bf Precision & \bf Recall & \bf F-measure\\ \hline 
-\bf 1p & 0.43 & 0.28 & 0.34 & 0.29 & 0.08 & 0.13 \\ \hline
-\bf 2p & 0.27 & 0.19 & 0.22 & 0.28 & 0.11 & 0.16 \\ \hline
-\bf 3p & 0.29 & 0.75 & 0.42 & 0.32 & 0.21 & 0.25 \\ \hline
-\bf Micro-avg & 0.32 & 0.42 & 0.36 & 0.31 & 0.15 & 0.20 \\ \hline
-\multicolumn{7}{c}{} \\
-\hline
-\multicolumn{7}{|c|}{\bf Our Full Model} \\
-\multicolumn{1}{|c|}{} & 
-\multicolumn{3}{|c|}{\bf SMS Test set} & 
-\multicolumn{3}{|c|}{\bf OntoNotes Test set} \\
-\hline
-\bf Pronoun & \bf Precision & \bf Recall & \bf F-measure & \bf Precision & \bf Recall & \bf F-measure\\ \hline 
-\bf 1p & 0.64 & 0.47 & 0.54 & 0.27 & 0.58 & 0.37 \\ \hline
-\bf 2p & 0.55 & 0.21 & 0.31 & 0.25 & 0.23 & 0.24 \\ \hline
-\bf 3p & 0.50 & 0.18 & 0.27 & 0.40 & 0.28 & 0.33 \\ \hline
-\bf Micro-avg & 0.59 & 0.31 & 0.41 & 0.30 & 0.36 & 0.33 \\ \hline
-\end{tabular}
-\end{center}
-\end{footnotesize}
-\caption{\label{fullresults} Results across different pronoun categories for (top) subject continuation and (bottom) our full model.}
-\end{table*}
-
-
-\subsection{Overall system efficacy} \label{efficacy}
-
-In this section we discuss the overall efficacy of our proposed method in comparison to a few alternatives. These alternatives are:
-
-\paragraph{Random guessing baseline.}
-A na\"ive system that makes predictions uniformly at random.
-
-\paragraph{Subject continuation baseline.}
-This is a rule-based approach that mimics the intuitions described in Section~\ref{ling}. In particular, for a Chinese utterance, we check whether the current utterance has an overt pronominal subject. If so, we assign a label of 1v, 2v or 3v depending on the person of this subject. If the current utterance has a non-pronominal subject, we assign 3h. Otherwise we ``carry forward'' the subject from the previous utterance, flipping the 1p/2p as necessary when the speaker changes; these are labeled as 1h, 2h or 3h.
-
-\paragraph{Minimal model baseline.}
-In the minimal model, we restrict our model to use just three features: participant index, participant switch and subject continuation feature. This is a machine learning variant of the rule-based subject continuation baseline.
-
-\paragraph{Oracle upper bound.}
-None of the proposed models can hope to achieve 100\% accuracy on this task because the Gold annotation data consists of $26\%$ ``no pronoun'' cases. Since all of our approaches \emph{must} predict a pronoun when a zero pronoun has been identified, their performance (namely, their precision) is upper-bounded away from $100\%$. 
-
-
-
-\begin{table}[t]
-\begin{footnotesize}
-\begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|}
-\hline
-                         & \multicolumn{3}{c|}{\bf SMS/chat}                          & \multicolumn{3}{c|}{\bf OntoNotes} \\
-                         & \multicolumn{3}{c|}{\bf Micro-average}                 & \multicolumn{3}{c|}{\bf Micro-average} \\
-\bf System               & \bf Pre & \bf Rec & \bf F & \bf Pre & \bf Rec & \bf F \\
-\hline
-    Random       & 0.24    & 0.25    & 0.24  & 0.18    & 0.26    & 0.22    \\
-    Minimal         & 0.42    & 0.23    & 0.30  & 0.30    & 0.07    & 0.11    \\
-    SubjCont & 0.32    & 0.42    & 0.36  & 0.31    & 0.15    & 0.20    \\
-\bf Full Model           & 0.59    & 0.31    & 0.41  & 0.30    & 0.36    & 0.33    \\
-    Upper Bound          & 0.74    & 1.00    & 0.85  & 0.55    & 1.00    & 0.71    \\
-\hline
-\end{tabular}
-\end{center}
-\end{footnotesize}
-\caption{\label{summary-results} Summary of results for different comparator models against the gold standard labels from SMS data (left) and OntoNotes (right).}
-\end{table}
-
-The summary of results (micro-averaged across 1p, 2p and 3p) are shown in Table~\ref{summary-results}. These results show that on both the SMS data (on which the model was developed) and the OntoNotes data (on which the model was applied blindly), our full model is able to substantially outperform the baselines. In fact, on OntoNotes, despite a potential domain mismatch (from SMS/chat to telephone conversations), our full model was the only baseline to beat random guessing! Across both data sets, the minimal model tends to have high precision and low recall; the behavior of the other approaches varies across the tasks. On the SMS/chat data, our model achieves a $14\%$ relative improvement over the best baseline; on an OntoNotes data, a $50\%$ relative improvement.
-
-More specific breakdowns of performance by different pronouns (1p, 2p and 3p) are shown for the subject continuation baseline and thefull model in Table~\ref{fullresults}. In these tables, we also report results when evaluated on the OntoNotes test set in these Tables. As we can see, the subject continuation baseline massively overpredicts third person pronouns in the SMS data, leading to an overall low score. In comparison, our model tends to have much higher precision (at the expense of recall) across the board on the SMS data, leading to a $14\%$ relative improvement over the subject continuation baseline.
-
-Since no prior work (see Section~\ref{related-work}) has focused on deictic pronoun restoration, it is not possible to directly compare our results to previously published results. Although it is an apples-to-oranges comparison, a state-of-the-art \emph{anaphoric} zero pronoun resolution system \cite{chenchinese} achieves a precision of $13.3$, a recall of $32.2$ and an f-measure of $18.8$ on the \emph{full} OntoNotes data (our results are just for telephone conversations), but does so addressing the complementary problem of correctly choosing antecedents from previous overt noun phrases.
-
-\subsection{Feature ablations} \label{ablation}
-
-\begin{table}[t]
-\begin{footnotesize}
-\begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|}
-\hline
-                         & \multicolumn{3}{c|}{\bf SMS/chat}                          & \multicolumn{3}{c|}{\bf OntoNotes} \\
-                         & \multicolumn{3}{c|}{\bf Micro-average}                          & \multicolumn{3}{c|}{\bf Micro-average} \\
-\bf System               & \bf Pre & \bf Rec & \bf F &\bf Pre & \bf Rec & \bf F \\
-\hline
-    Minimal (M)       & 0.42 	& 0.23 	& 0.30    & 0.30 	& 0.07 	& 0.11    \\
-    M +  question 	& 0.44 & 0.23 & 0.30     & 0.31 & 0.07 & 0.12   \\
-    M + object		& 0.43 & 0.23 & 0.30   & 0.30 & 0.07 & 0.12  \\
-    M +  verb	           & 0.58 & 0.29 & 0.39    & 0.32 & 0.13 & 0.18    \\
-    M + pos 		  & 0.52 & 0.30 & 0.38   & 0.23 & 0.27 & 0.25  \\
-    M + bow		& 0.59 & 0.28 & 0.38 & 0.30 & 0.35 & 0.32  \\
-    \bf Full Model           & 0.59    & 0.31    & 0.41    & 0.30    & 0.36    & 0.33    \\
-\hline
-\end{tabular}
-\end{center}
-\end{footnotesize}
-\caption{\label{feature-ablation} Summary of results for feature ablation against the gold standard labels from SMS data (left) and OntoNotes (right).}
-\end{table}
-
-In order to investigate the individual contributions of each of our features, we performed feature ablation experiments, pairing our Minimal Model with a single feature at a time and retraining the model with this pairing. The results of these experiments can be seen in Table \ref{feature-ablation}.
-We see in this table that for the SMS data, the Verb feature creates the greatest improvement over the Minimal Model, followed by Bag of Words and Bag of POS. This supports the hypothesis that the verb is informative with respect to the nature of its subject, as are the other words of the clause, and their parts of speech. For the OntoNotes corpus, however, the Bag of Words feature performs best by a large margin. Interesting, although the Bag of Words features are clearly the most useful, the linguistically motivated features (verb/question) performing well supports our linguistic intuitions.
-
-\section{Discussion and prior work}\label{related-work}
-
-Past approaches to zero pronoun resolution focus exclusively on anaphoric zero pronouns approached as a task of antecedent identification. Almost all work makes use of syntactic structure, with differences primarily in how that structure is used. \cite{yeh2007zero} take a rule-based, Centering Theory-inspired approach based on a system of constraints to guide selection of zero pronoun antecedents. In the same year, \cite{zhao2007identification} introduced a supervised learning approach for both zero pronoun identification and antecedent selection based on engineered features; these engineered features were replaced with a tree-kernel by \cite{kong2010tree}, who jointly perform zero pronoun identification, anaphoricity determination, and antecedent selection. Recently, \cite{chen2013chinese} built upon the model introduced by Zhao and Ng, introducing additional features and allowing coreference links between multiple zero pronouns. Chen and Ng (2013) also test their model on automatically identified zero pronouns and automatically generated parse trees, thus presenting the first end-to-end Chinese zero pronoun resolver. 
-
-These approaches are mostly complementary to our task, since they focus on resolving anaphoric zero pronouns (the minority!) while we focus on resolving deictic zero pronouns. In particular, for a complete end-to-end system that resolves both deictic and anaphoric zero pronouns, one could first take our approach and whenever our model predicts ``third person,'' which is typically an anaphoric reference, one could apply one of these prior approaches.
-
-The only work we are aware of that does not require linguistically annotated data for zero pronoun resolution is that of \cite{chenchinese}. They hypothesize that zero pronouns and overt pronouns have \emph{similar} distributions, and train an unsupervised model on \emph{overt} pronouns and then apply this model to \emph{zero} pronouns. This model performs on par with their previous (2013) supervised model. Despite this, their unsupervised model only agrees with their supervised model on 55\% of zero pronoun antecedents, suggesting that this hypothesis is weak.
-
-In particular, the complementarity of zero versus overt pronoun usage has been studied within various domains of linguistics. The Position of Antecedent Hypothesis \cite{carminati2002processing} states that null and overt pronouns have different antecedent selection preferences: null pronouns prefer antecedents in subject positions, while overt pronouns prefer antecedents in non-subject positions. This hypothesis has been supported by studies in a variety of pro-drop languages (e.g., \cite{alonso2002null} \cite{kweon2011processing}). Switching of reference has been identified as one of the main constraints regulating use of zero versus overt pronouns in the variationist literature (see \cite{cameron1992pronominal} for sociolinguistic studies of the phenomenon in Spanish).% However these constraints on zero versus overt pronoun distribution have not been clearly captured and utilized in techniques for pronoun resolution and restoration. 
-
-Our main result shows that although our bronze standard labels are noisy (Section~\ref{efficacy}), they are nonetheless for learning to resolve deictic pronouns. Moreover, one oft-heralded advantage of the translation-as-annotation scheme \cite{carpuat07psd} is that it naturally integrates into a machine translation framework, since one is learning to predict precisely what is necessary for successful translation; evaluating whether this hypothesis is true is currently an open question.
-
 
 \newpage
 
-\chapter{Selecting next best response during two-way conversation}\label{dialogue_next_response}
+\chapter{Clarification Questions for Dialogues}\label{dialogue_next_response}
 
-\section{Introduction}
+\section{Motivation}
 
+\noindent
+In the theory of discourse structure \cite{grosz1986attention}, a discourse is said to consist of three interrelated components: structure of the utterances, structure of intensions and the focus of attention. Intension is defined as the purpose of each of the individual discourse segments of a discourse. Grosz discusses that each participant of a conversation has a certain intension in mind when they utter a discourse segment and in several cases a level of shared knowledge is essential for the successful recognition of an intension. In the absence of such shared knowledge, participants indulge in clarifications. In our next research direction, we explore how we can learn to generate clarification questions in context of dialogues\\
+
+\noindent
+In the previous work, we developed a model for generating a clarification question in a non-interactive setting i.e. after someone has described their problem in its entirety, we ask a question. However, most of such problem solving happens in the form of a dialog between a system and a human. In this work, we look at how we can generate clarification questions in the context of a conversation. We begin with the task of next utterance response in a conversation and then propose a model for generating a response which would be a clarification question.
+
+\section{Next response generation in dialogues}
+
+\subsection{Introduction}
 Data-driven methods for dialogue have experienced a recent surge in interest, due to a combination of the increasing availability of data and improved machine learning techniques.  To facilitate public research, \cite{lowe2015ubuntu} put together the Ubuntu Dialogue corpus by extracting two-way conversations from chat logs of discussions about issues with the Ubuntu Operating system. The task associated with the dataset is next utterance classification, given a portion of a conversation, and a set of possible next responses, identify the correct next response.
 
 \begin{figure}
@@ -910,7 +718,7 @@ Secondly, due to the informal nature of these chats, they include several instan
 
 To evaluate our ideas, we conduct experiments on the Ubuntu Dialogue corpus where we start with the reference baseline model (Section~\ref{dataset_baseline}) described in \cite{lowe2015ubuntu} and apply modifications to it using ideas previously shown to be effective for dialogue modeling (attention aggregation and hierarchical modeling) to get a stronger baseline (Section~\ref{baseline_modifications}). We then show that our vocabulary redefining strategies, \textit{bursty vocabulary} and \textit{character trigram histogram}, give us significant improvements over the stronger baseline.  The simplicity of our approaches suggests general applicability for dialogue modeling. %Our contributions are inspired by best practices in language modeling, and their simplicity suggests general applicability for dialog modeling.
 
-\section{Related Work} \label{related_work}
+\subsection{Related Work} \label{related_work}
 
 Following the introduction of the Ubuntu dialogue dataset, there has been several recent work that uses this dataset. 
 \cite{lowe2015ubuntu} describe two neural network baseline models using Recurrent Neural Network (RNN) and Long Short Term Memory (LSTM). %\cite{hochreiter1997long}. 
@@ -919,9 +727,9 @@ Following the introduction of the Ubuntu dialogue dataset, there has been severa
 \cite{baudivs2016sentence} introduce a unified approach for scoring sentence pairs %applicable to number of tasks including next utterance classification 
 and show the current best result on the Ubuntu dialogue corpus task. 
 
-The technique of attention aggregation (Section~\ref{attention_aggregation}) has been effectively used for several language based tasks like neural machine translation \cite{bahdanau2014neural}, \cite{luong2015effective}, question answering \cite{hermann2015teaching} and dialogue modeling \cite{yao2016attentional}. 
+The technique of attention aggregation has been effectively used for several language based tasks like neural machine translation \cite{bahdanau2014neural}, \cite{luong2015effective}, question answering \cite{hermann2015teaching} and dialogue modeling \cite{yao2016attentional}. 
 %More specifically in dialogue modeling, \cite{yao2016attentional} have shown that attending to the context while generating the words of the response gives an improvement over using just the last hidden state.
-The technique of hierarchical modeling (Section~\ref{hierarchical_modeling}) was first introduced by \cite{serban2016hierarchical} as a latent hierarchical model where they add a context level RNN on top of token level RNN for processing sequences of sub-sequences.
+The technique of hierarchical modeling was first introduced by \cite{serban2016hierarchical} as a latent hierarchical model where they add a context level RNN on top of token level RNN for processing sequences of sub-sequences.
 \cite{serban2016multiresolution} take a similar approach but instead of defining a latent coarse representation, they assume it to be observed in the form of sequence of nouns and sequence of activities and entities
 %\cite{serban2016multiresolution} take a similar approach but instead of defining a latent coarse representation, they assume it to be observed and experiment with two such representations (sequence of nouns and sequence of activities and entities).
 
@@ -936,29 +744,31 @@ In the field of neural machine translation, there has been some work on vocabula
 However, there has been no prior work that defines the vocabulary as we do for the purpose of dialogue modeling.
 The character trigram histogram technique (Section~\ref{character_trigram_histogram}) was introduced as word hashing \cite{huang2013learning} to reduce the dimensionality of bag-of-words term vectors. We, on the other hand, find its use in normalizing over character level differences by enhancing the word-level representation with the character trigram histogram. 
 
-\section{Dataset and Baseline Model}\label{dataset_baseline}
+\subsection{Dataset and Baseline Model}\label{dataset_baseline}
 
 The Ubuntu dialogue corpus is a collection of one million two person conversations systematically extracted from chat log of forums where people discuss issues related to the ubuntu operating system. The task associated with the dataset is next utterance classification, which facilitates assessment while remaining plausibly related to more
 complex design goals.  The problem, given a portion of a conversation (\textit{context} in Figure~\ref{sample_conversation}), and a set of possible next responses, is to identify the correct next response (\textit{response} in Figure~\ref{sample_conversation}).  The set of possible next responses includes the true continuation of the conversation as well as negative distractor utterances randomly sampled from the corpus.
 
 We use the best reference model provided with the dataset as our starting point which is a siamese network of two LSTMs, one for context and one for response, with tied weights. The words of the context (and response) is fed into the LSTM one word at a time. The final hidden state of the two LSTMs represent the summary of the input context and the response respectively and the model is trained to minimize the cross entropy of all labelled context, response pairs.
 
-\section{Baseline Modifications}\label{baseline_modifications}
+\subsection{Baseline Modifications}\label{baseline_modifications}
 
-\subsection{Attention Aggregation}\label{attention_aggregation}
+\subsubsection{Attention Aggregation}
 
+\noindent
 The baseline model described before uses the last hidden state of the LSTM to represent the input. Our experiments indicate that a simple averaging of the hidden states gives an improvement over using just the last state. We achieve a further improvement with a simple attention mechanism. % by taking a weighted average over the hidden states where the weights are learned during training.  
 %The idea of attending to some part of the input more than the other was first used for translation \cite{bahdanau2014neural}. %where the probability of predicting a certain word on the target side was conditioned on a distinct context on the source side. 
 %In dialogue modeling, 
 \cite{yao2016attentional} show that attending to the context while generating the words of the response gives an improvement over using just the last hidden state. On similar lines, we use the notion of soft-attention where we take a weighted average over the hidden states and learn those weights during training. 
 
-\subsection{Hierarchical Modeling}\label{hierarchical_modeling}
+\subsubsection{Hierarchical Modeling}
 
+\noindent
 Conversation between two people proceeds via utterances such that each utterance defines a message in itself and the utterances together define the conversation. To model this hierarchy, we define a token level LSTM that operates on the tokens and an utterance level LSTM that operates on the utterances. Hidden states from token-level LSTM are aggregated using attention to get utterance level representations which are then fed to an utterance level LSTM. Hidden states from utterance level LSTM are finally aggregated using attention to represent the input. %Hierarchical modeling techniques similar to ours have been shown to be effective for dialogue modeling \cite{serban2016hierarchical}, \cite{tranhierarchical}.
 
-\section{Our Vocabulary Redefining Methods}\label{our_methods}
+\subsection{Our Vocabulary Redefining Methods}\label{our_methods}
 
-\subsection{Bursty Vocabulary}\label{bursty_vocabulary}
+\subsubsection{Bursty Vocabulary}\label{bursty_vocabulary}
 
 Models that use vector representations for words often define the vocabulary using a cut-off on the frequencies of words in the entire corpus, replacing all lower frequency words with a special out-of-vocabulary token. As is typical with power law statistics, there are a large number of infrequently occurring tokens in the Ubuntu Dialogue corpus e.g., due to misspellings and incorrect tokenization.  Cross validation indicates the optimal frequency cutoff for this dataset is actually quite high, e.g., including tokens with a total count below 20 leads to overfitting. 
 However, these rare terms include tokens that are only used in a few conversations, but which occur at a high frequency within these conversations.  Intuitively this could correspond to rare entities that are the topic of a few conversations, and which would be  highly discriminative for next utterance classification. To upweight such words, we define the following notion of a bursty vocabulary: the frequency of a word is defined by its count in the conversation where it occurs the most and a vocabulary is thereafter defined using a cut-off on these word frequencies.  Experimentally this simple approach is surprisingly effective.
@@ -986,18 +796,17 @@ Model & TF-IDF & RNN & LSTM & +Attn & +Hierar & +Bursty & +TrigHist & RNN-CNN \\
 \label{results}
 \end{table*}
 
-\subsection{Character Trigram Histogram} \label{character_trigram_histogram}
-
+\subsubsection{Character Trigram Histogram} \label{character_trigram_histogram}
 
 Most modeling of text for various natural language processing tasks have been done at the word level. Recent work in neural machine translation has seen the benefit of modeling at a sub-word level. This can be especially useful for natural dialog due to phenomena such as misspellings, elided white spaces, and abbreviation. We found character trigram histograms to be simple and highly effective. Figure \ref{fig:trigram_histogram} shows a sample trigram histogram of the word \textit{bananas}. The left column lists all the trigrams in the word and their frequencies.  Associated with each trigram is an index: a trigram which occurs sufficiently frequently in the training corpus is assigned a unique index, and all other trigrams are assigned the special out-of-trigram index. The trigram histogram for each word is then defined as a frequency vector of size of the trigram vocabulary.  
 We reduce the dimensionality of the trigram histogram vector using Principal component analysis (PCA) \cite{tipping1999probabilistic} and concatenate it with the word embedding to get our final word representation. The representations of two words that have small edit distance will have larger inner product, thus facilitating statistical transfer between them.
 This yields two interesting properties.  First, the representations for two tail tokens that have small edit distance will have larger inner product than if the edit distance were large, facilitating statistical transfer between tail terms of low edit distance.  Second, the use of dropout on the input variables will facilitate statistical transfer between head terms and tail terms with small edit distance, as the one-hot portion of the representation will sometimes be dropped out.
 
-\section{Experiments and Results}\label{ubuntu_experiments_results}
+\subsection{Experiments and Results}\label{ubuntu_experiments_results}
 
 We evaluate our models on the Ubuntu Dialogue corpus\footnote{We use version 2 of the dataset where negative sampling is not uniform, thus increasing the difficulty of identifying the next utterance.} which consists of one million dialogues. Out of this 2\% is set aside as the test set, 2\% as the validation set and the rest is used for training. The task is set up as a ranking task where given $n$ responses, a system's ranking is considered as correct if the correct response is among the first $k$ candidates. We report recall values with $(n,k)$ as $(2,1), (10, 1), (10, 2)$ and $(10, 5)$. 
 
-\subsection{Experimental Details}
+\subsubsection{Experimental Details}
 We implement our models\footnote{Our code is available on \href{http://github.com/raosudha89/ubuntu_dialogue}{github} } using the Lasagne \cite{lasagne} library. For all our LSTM based models and its variations, we limit the number of context and response tokens to 100 and use a single hidden layer of size 300. We use Adam \cite{kingma2014adam} as our optimizer, with gradients clipped to 10. 
 
 For representing a word, we use word embeddings of size 300 which are initialized using the pre-trained GloVe vectors (Common Crawl, 840B tokens \cite{pennington2014glove}) and fine-tuned during training. Words in the corpus not included in the pre-trained model are initialized randomly using uniform sampling from [-0.25, +0.25] to match the embedding standard deviation. 
@@ -1005,20 +814,23 @@ For representing a word, we use word embeddings of size 300 which are initialize
 For our character trigram histogram model, we further append the word embedding with a trigram histogram embedding of size 50 %(obtained by PCA on the trigram histogram frequency vector). 
 We use a frequency threshold of 15 for our regular vocabulary and 3 for our bursty vocabulary.  
 
-\subsection{Results}
+\subsubsection{Results}
 Table~\ref{results} compares the performances of different models. We obtain results by incrementally adding each of our methods to the LSTM baseline model described in \cite{lowe2015ubuntu} such that the `+TrigHist' column corresponds to our final model which is a combination of all our methods.
-%The recall values steadily increase from left to right
-%TF-IDF, RNN and LSTM are the baseline models described in \cite{lowe2015ubuntu}. 
-%Columns with prefix `+' in their heading should be read as the incremental results obtained by the addition of current model to all the previous models starting from the LSTM baseline such that the `+TrigHist' column corresponds to our final model. 
-%The last column corresponds to state-of-the-art \cite{baudivs2016sentence} on this dataset which is a combination of recurrent and convolutional neural networks (RNN-CNN). 
 The results show that our \textit{bursty vocabulary}  and \textit{character trigram histogram} strategies together achieve a 3\% improvement over the strong LSTM+attention+hierarchical baseline and are comparable to the state-of-the-art model. 
 
-\section{Conclusion}
+\subsection{Conclusion}
+In this work, we introduce a novel method for the task of next utterance classification given the context of a conversation. We introduce two strategies for redefining the vocabulary to make it more conducive to a dialogue environment. By upweighting words that occur in bursts within a conversation, our \textit{bursty vocabulary} strategy redirects the focus of a model from frequent words to topical words. By modeling character level information, our \textit{character trigram histogram} strategy helps bin slightly varying words together thus overlooking issues like misspellings, elided white spaces, abbreviations and informal word variations found frequently in dialogues. Although our methods have been inspired by the atypical word usage in dialogues, we can apply them to other scenarios where such rare word modeling could be useful; for e.g. machine translation, community based question answering on \textit{StackExchange, Reddit}, or any task that make use informal data such as \textit{Twitter, Facebook or SMS}.\\
 
-In this work, we introduce two strategies for redefining the vocabulary to make it more conducive to a dialogue environment. By upweighting words that occur in bursts within a conversation, our \textit{bursty vocabulary} strategy redirects the focus of a model from frequent words to topical words. By modeling character level information, our \textit{character trigram histogram} strategy helps bin slightly varying words together thus overlooking issues like misspellings, elided white spaces, abbreviations and informal word variations found frequently in dialogues. 
+\section{Clarification Question Generation}
 
-%In future, we plan to apply our methods to other tasks that use dialogue-like data (e.g. twitter, online community question answering, etc). 
-Although our methods have been inspired by the atypical word usage in dialogues, we can apply them to other scenarios where such rare word modeling could be useful; for e.g. machine translation, community based question answering on \textit{StackExchange, Reddit}, or any task that make use informal data such as \textit{Twitter, Facebook or SMS}.
+\subsection{Problem Formulation}
+In the previous section, we described a model that learns to select the next best response given the context of a conversation. Given this model, we now turn to our main research question: can we automatically generate clarification questions given the context of a conversation? We find that in Ubuntu Dialogue Dataset, several responses to a conversation are questions. This is mainly because of the problem solving nature of these chats. Hence for our next task, we consider a subset of the Ubuntu Dialogue Dataset where every response is a question and define our task as given the context of a conversation, choose the next best question. 
+
+\subsection{Using EVPI model}
+Our EVPI model (Section~\ref{model}) discussed in our previous work relies on the (post, question, answer) triples. We now describe how we extend this idea to our conversational clarification question generation. We use the context of our conversation as `context', the immediate question based response as the `question' and the utterance following the response as our `answer' to create our dataset of (post, question, answer) triples. We make the assumption that when a participant raises a question, the other participant's likely next response would be an answer to that clarification question.  Given this setup, we then propose to use a model similar to the EVPI inspired model to select a question from a set of ten candidate questions, given a context of a conversation. Instead of using a vanilla LSTM model for training our answer model and our utility calculator, we use an ensemble of the models we describe in the previous section i.e. attention aggregation, hierarchical modeling, character trigram histogram modeling and bursty vocabulary. 
+
+\subsection{Learning when to ask a question}
+Asking a clarification question during a conversation can be different from asking a question on a Q\&A post in that one can decide when to ask the question during the span of the conversation. Therefore, we propose to extend our model such that it can learn the trade-off between asking a generic question at the initial stages and asking a specific question at the later stages of a conversation. We propose to use different lengths of context of a single conversation to compare the value of generating a clarification question early on in a conversation with little context and the value of waiting and generating a clarification question later on in the conversation with more context. We propose to incorporate a cost function into our model that would measure the worth of asking a question at an early stage versus at a later stage.
 
 \newpage
 
@@ -1037,8 +849,7 @@ In our preliminary work, we focused on the question selection problem i.e. selec
 
 \noindent
 For grouping similar questions together, we plan to explore some of the clustering algorithms which cluster documents based on their lexical and semantic similarity. A preliminary experiment of trying to cluster questions has revealed that the questions are too different from each other to form useful clusters. We therefore propose a different strategy in which we will remove topic specific words from the questions and then cluster them, thus forcing a generalization before grouping them. To generate templates corresponding to each cluster, we plan to further identify topic specific words from the question using syntactic information (like parts-of-speech tags) and then remove them to form generic templates. In the third step, given a post and a set of candidate question templates, we will select a template using a model similar to our clarification question selection model described in our preliminary work in Chapter~\ref{stackexchange}. Finally, in the fourth step, we will fill in the blanks in the template with topic specific words from the post. We plan to first generate a candidate set of topic words from the post and then train a machine learning model which given the context of the post and the question template would select the correct topic word from the candidate set of topic words.
-%plan to explore methods similar to slot filling approaches \cite{} to populate the blanks in the template with post specific words.
- 
+
 \newpage
 \section{Sequence-to-sequence based question generation}
 
@@ -1047,15 +858,7 @@ Sequence-to-sequence neural network models have proven to be effective for sever
 \noindent
 On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model \cite{yin2016neural} built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post. Using this approach we thus incorporate the template based question generation method into a more general neural network framework.
 
-\section{Clarification questions for dialog systems}
-
-In our preliminary work we developed a model for generating a clarification question in a non-interactive setting i.e. after someone has described their problem in its entirety, we ask a question. However, most of such problem solving happens in the form of a dialog between a system and a human. In our next research direction, we propose to build a model that learns to generate  clarification questions at different stages of an ongoing conversation. Our model will learn the trade-off between asking a generic question at the initial stages and asking a specific question at the later stages of a conversation. We will define a cost function that measures the worth of asking a question at an early stage versus at a later stage. \\
-
-\noindent
-For the dataset, we plan to use the Ubuntu Dialogue corpus, a large corpus recently put together by \cite{lowe2015ubuntu} by extracting two-way conversations from chat logs where people were discussing about the issues they were having with the Ubuntu Operating system. In our preliminary work (Chapter~\ref{dialogue_next_response}), we defined a model that selects the next best response given the context of a conversation. We find that, given the problem solving domain of these chats, many of these responses are questions. Therefore, we plan to define our task as, given the context of a conversation, decide whether there is value in generating a clarification question as the next response and if there is some value, ask the question. We will use different lengths of context of a single conversation to compare the value of generating a clarification question early on in a conversation with little context and the value of waiting and generating a clarification question later on in the conversation with more context. 
-
-\newpage
-\section{Identifying missing information using knowledge bases}
+\section{Using external knowledge to identify missing information}
 
 In the approaches described so far, the models learn to ask a clarification question by looking at previously asked questions in a similar context. More specifically, we rely on our data to include the kinds of questions that we would like to ask. The main purpose of generating the clarification questions is to identify the missing information in a given text. To understand what is missing, one needs to first know what should have been there. As humans, we rely on our prior knowledge about the subject to decide what should have been there but is missing and then ask a clarification question pointing out the missing information. \\
 
@@ -1068,22 +871,21 @@ Therefore, in our last proposed work, we propose to develop a model which extrac
 \item Finally, in the fourth step, we will generate a question that would ask about the missing attribute identified in the previous step.
 \end{enumerate}
 
-
 \newpage
 
 \chapter{Conclusion and Timeline}\label{conclusion}
 
-In this proposal, we identify that the problem of generating clarification questions is a problem worth of study, both in its own right and as part of the larger problem of building naturalistic conversational systems. To our knowledge, this is the first time a work has focused solely on generating clarification questions. We present our preliminary work on generating clarification questions on StackExchange posts and propose methods to generalize this approach further to new contexts. We present our work on dialogue focus tracking and its application on the task of zero-pronoun resolution. We present our preliminary work on identifying the next best response given the context of a conversation and propose methods to specifically generate clarification questions in the context of dialogues. Finally, we propose a novel method that makes use of external knowledge bases to identify missing information before it generates a question, thus bridging the gap between pure corpus driven approaches and pure knowledge base driven approaches for question generation. 
+In this proposal, we identify that the problem of generating clarification questions is a problem worth of study, both in its own right and as part of the larger problem of building naturalistic conversational systems. To our knowledge, this is the first time a work has focused solely on generating clarification questions. We present our preliminary work on generating clarification questions on StackExchange posts and propose methods to generalize this approach further to new contexts. We present our preliminary work on identifying the next best response given the context of a conversation and propose methods to specifically generate clarification questions in the context of dialogues. Finally, we propose a novel method that makes use of external knowledge bases to identify missing information before it generates a question, thus bridging the gap between pure corpus driven approaches and pure knowledge base driven approaches for question generation. 
 
 \section{Timeline}
 
 The timeline for my proposed work is as follows:
 \begin{itemize}
 \item 2017-05: Proposal
-\item 2017-09: Template based question generation
-\item 2017-11: Sequence to sequence based question generation
-\item 2018-01: Clarification questions for dialogues
-\item 2018-04: Identifying missing information using knowledge bases
+\item 2017-09: Clarification questions for dialogues
+\item 2017-11: Template based question generation
+\item 2018-01: Sequence to sequence based question generation
+\item 2018-04: Using external knowledge to identify missing information
 \item 2018-06: Thesis
 \item 2018-07: Defense
 \end{itemize}
