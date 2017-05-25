@@ -23,11 +23,14 @@
 \usepackage{amsfonts}
 \usepackage{url}
 
+\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
+
 \makeatletter
 \newcommand{\@emptybiblabel}[1]{}
 \makeatother
 \DeclareMathOperator*{\argmax}{arg\,max}
-\setlength\titlebox{3.5cm}    % Expanding the titlebox
+%\setlength\titlebox{3.5cm}    % Expanding the titlebox
 
 \newcommand*{\checktikz}[1][]{\tikz[x=1em, y=1em]\fill[#1] (0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
 \newcommand*{\crosstikz}[1][]{\tikz[x=1em, y=1em]\fill[#1] (0,0) -- (1,1) -- (0.5,0.5) -- (0.1,0.1) -- cycle;}
@@ -40,6 +43,11 @@
 \newcommand{\Wrong}{} %\textsf{X}~}
 
 \newcommand{\U}{\mathbb{U}}
+
+\author{Sudha Rao \\
+  Department of Computer Science \\
+  University Of Maryland, College Park \\
+  {\tt raosudha@cs.umd.edu}}
 
 \title{Are you asking the right questions? \\ Teaching Machines to Ask Clarification Questions}
 
@@ -231,7 +239,7 @@ On an easier domain, or with annotators who are truly experts, we might expect t
 \section{Proposed Research Directions}
 
 In our preliminary work, we focus on the question selection problem i.e. select the right clarification question from a set of prior questions.
-To enable our system to generalize well to new context, we propose two new research directions:
+To enable our system to generalize well to new context, we propose two future research directions:
 %To make the system more general, it needs to generalize to new context well. Towards this goal, we propose two new research directions:
 
 \subsection{Template Based Question Generation}
@@ -247,16 +255,18 @@ To enable our system to generalize well to new context, we propose two new resea
 
 \subsection{Neural Network Generative Model}
   
-Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation \cite{sutskever2014sequence}, dialog generation \cite{serban2016building}, etc. These models are based on an encoder-decoder framework where the encoder takes in a sequence of words and generates a vector representation of the input. The decoder then takes in this input representation and generates a sequence of words as its output. 
+Sequence-to-sequence neural network models have proven to be effective for several language generation tasks like machine translation \cite{sutskever2014sequence}, dialog generation \cite{serban2016building}, etc. These models are based on an encoder-decoder framework where the encoder takes in a sequence of words and generates a vector representation which is then taken in by a decoder to generate the output sequence of words.
+%of the input. The decoder then takes in this input representation and generates a sequence of words as its output. 
 
 On similar lines, we propose a model for generating the clarification question one word at a time, given the words of a post. A recent neural generative question answering model \cite{yin2016neural} built an answer language model which decides, at each time step, whether to generate a common vocabulary word or an answer word retrieved from a knowledge base. %Thus the model is built on an encoder-decoder framework equipped with the ability to enquire a knowledge base of facts contained in the form of entity-relationship triples. 
 Inspired from this work, we propose to build a question generation model which will decide, at each time step, whether to generate a common vocabulary word or a topic specific word retrieved from the current post, thus incorporating the template-based method into a more general neural network framework.
 
 \section{Conclusion}
 
-In our work we describe a new dataset for question generation, and build a model that integrates state-of-the-art neural network structure with the classic notion of expected value of perfect information, which effectively models a pragmatic choice on the part of the questioner: how do I \emph{imagine} the other party would answer if I were to ask this question. Such pragmatic priciples have recently been shown to be useful in other tasks as well \cite{golland2010game,smith2013learning,orita2015discourse,andreas2016reasoning}.
+In our work, we introduce a novel dataset for clarification question generation, and build a model that integrates neural network structure with the classic notion of expected value of perfect information. %, which effectively models a pragmatic choice on the part of the questioner: how do I \emph{imagine} the other party would answer if I were to ask this question. Such pragmatic principles have recently been shown to be useful in other tasks as well\cite{golland2010game,smith2013learning,orita2015discourse,andreas2016reasoning}.
+Our preliminary model learns to select the right question from a set of candidate questions. We propose two future directions for automatically generating clarification questions.
 
-One main avenue for improvement of this work is in evaluation: given that this task is so difficult for humans, but also given that there is no single right question to ask, how can we better measure performance at this task? This is exactly the same question faced in much research in dialog and generation more broadly \cite{paek2001empirical,lowe2015ubuntu,liu2016not,kannan2017adversarial}. Finally, asking question is a natural component of dialog, and building a collaborative dialog system that can naturally converse with a user is a broad long term goal.
+One main avenue for improvement of this work is in evaluation: given that this task is so difficult for humans, but also given that there is no single right question to ask, how can we better measure performance at this task? This is exactly the same question faced in dialog and generation \cite{paek2001empirical,lowe2015ubuntu,liu2016not,kannan2017adversarial}. Finally, asking question is a natural component of dialog, and building a collaborative dialog system that can naturally converse with a user is a broad long term goal.
 
 \bibliography{acl_student_research}
 \bibliographystyle{acl_natbib}
