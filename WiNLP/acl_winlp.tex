@@ -95,7 +95,7 @@ Our work has two main contributions:
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=0.85\textwidth]{model_description}
+	\includegraphics[width=0.85\textwidth]{model}
 	\caption{\small The behavior of our model during test time. Given a post $p$, we use Lucene to retrieve 9 posts similar to post $p$ and consider the questions asked to those 9 posts, plus the original, as question candidates $Q$ and the edits made to the posts in response to the questions as our answer candidates $A$. For each question candidate $q_i$, we generate an answer representation $F(p,q_j)$ and model the answer probability $\mathbb{P}[a | p,q]$ as the closeness of the answer candidate $a_k$ to the answer representation $F(p,q_j)$. The utility function $U$ calculates the utility of the post if it were updated with the answer $a_k$. Finally we return the question $q$ that maximizes the expected utility of the post $p$ (Equation~\ref{evpi_equation}).}
 	\label{model}
 \end{figure*}
@@ -105,7 +105,7 @@ The problem of question generation has received sparse attention from the natura
 
 \section{Model Description}\label{model_description}
 
-In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI). EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$ that we can ask, there is set $A$ of possible answers that could be given. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The value of this question $q$ is the expected utility, over all possible answers. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
+In order to choose what question to ask, we build a neural network model inspired by the theory of expected value of perfect information (EVPI) \cite{avriel1970value}. EVPI is a measurement of: if I were to acquire information X, how useful would that be to me? However, because we haven't acquired X yet, we have to take this quantity in expectation over all possible X, weighted by each X's likelihood. In the question generation setting, for any given question $q$ that we can ask, there is set $A$ of possible answers that could be given. For each possible answer $a \in A$, there is some probability of getting that answer, and some utility if that were the answer we got. The value of this question $q$ is the expected utility, over all possible answers. The theory of EVPI then states that we want to choose the question $q$ that maximizes:
 \begin{equation}\label{evpi_equation}
 \argmax_{q \in Q} \sum_{a \in A} \mathbb{P}[a | p,q] \U(p+a)
 \end{equation} 
